@@ -66,9 +66,13 @@ Large rasters (land cover, flood extents) should be stored as PMTiles or Cloud-O
 - operating hours: first bus 05:30, last arrival 20:30
 - headways: every 10–15 min (1A, 2, 3, 4B), 15–20 min (5B, 6, 9) and 20–30 min (others)
 
-**Approximate in this first version:**
-- Line geometry is hand-traced through waypoints on the named roads.
-- Stops are spaced evenly along each line. Every feature is tagged `position_quality: "approximate"`.
+**Routed on real roads:**
+- Each line follows the MPWT 2014 road network (`Kh_All_Roads_MPWT2014`) through anchor points on the roads named in the brochure. The cheapest path between anchors prefers national, provincial and city roads over tracks.
+- Line 6's return along Win Win Blvd is newer than the 2014 roads, so that part is a straight segment. It is listed in the line's `gaps` field.
+- To re-route after moving anchors in `tools/route_citybus_on_roads.py`, run `python3 tools/route_citybus_on_roads.py pp_roads.geojson`. The script header shows how to make `pp_roads.geojson`.
+
+**Still approximate:**
+- Stops are in brochure order but spaced evenly along each route. Every stop is tagged `position_quality: "approximate"`.
 
 **Estimated:**
 - Times at each stop = distance along the line ÷ average speed (default 16 km/h), plus a stop of 20 s at each bus stop.

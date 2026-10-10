@@ -40,6 +40,9 @@
   const km = () => A.lang === "km";
   const nm = (p, pre = "name") => (km() && p[`${pre}_km`] ? p[`${pre}_km`] : p[`${pre}_en`]);
   const cls = (p) => (km() ? p.class_km : p.class_en);
+  /** Name with its unit type: Khmer puts the type first ("ខេត្ត កណ្ដាល", "ភូមិ កណ្ដាល"); English shows the name only. */
+  const fullName = (p, kmClass) => (km() && p.name_km ? `${kmClass || p.class_km || ""} ${p.name_km}`.trim() : p.name_en);
+  const VILLAGE_KM = "ភូមិ";
   const isDark = () => {
     const th = document.documentElement.getAttribute("data-theme");
     return th ? th === "dark" : !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -102,10 +105,10 @@
     for (const lvl of LEVELS) {
       onMove(`adm-fill-${lvl}`, LAYER[lvl], (p) => {
         const m = S.level === lvl ? S.metric : "area_km2";
-        return `<b>${esc(nm(p))}</b> <span class="muted">${esc(cls(p))}</span><br><span class="num">${nf(p[m])}</span> ${t(UNIT[m])}`;
+        return `<b>${esc(fullName(p))}</b>${km() ? "" : ` <span class="muted">${esc(cls(p))}</span>`}<br><span class="num">${nf(p[m])}</span> ${t(UNIT[m])}`;
       });
     }
-    onMove("adm-villages", "villages", (p) => `<b>${esc(nm(p))}</b> <span class="muted">${t("adm_village")}</span>`);
+    onMove("adm-villages", "villages", (p) => km() ? `<b>${esc(fullName(p, VILLAGE_KM))}</b>` : `<b>${esc(nm(p))}</b> <span class="muted">${t("adm_village")}</span>`);
     map.on("click", (e) => {
       const v = map.queryRenderedFeatures(e.point, { layers: ["adm-villages"] })[0];
       if (v) return selectVillage(v.properties, false);
@@ -162,8 +165,8 @@
 
   function chain(r) {
     const parts = [];
-    if (r.dist_en) parts.push(`${esc(km() ? r.dist_km : r.dist_en)}`);
-    if (r.prov_en) parts.push(`${esc(km() ? r.prov_km : r.prov_en)}`);
+    if (r.dist) { const d = S.byCode[`district:${r.dist}`]; parts.push(esc(d ? fullName(d) : (km() ? r.dist_km : r.dist_en))); }
+    if (r.prov) { const p = S.byCode[`province:${r.prov}`]; parts.push(esc(p ? fullName(p) : (km() ? r.prov_km : r.prov_en))); }
     return parts.join(" · ");
   }
   function renderInfo() {
@@ -173,8 +176,8 @@
     if (sel.kind === "village") {
       const v = sel.v, c = sel.comm;
       el.innerHTML = `<div class="eyebrow">${t("adm_village")}</div>
-        <div class="adm-name">${esc(nm(v))}${km() ? ` <span class="muted">${esc(v.name_en)}</span>` : ` <span class="muted">${esc(v.name_km || "")}</span>`}</div>
-        ${c ? `<div class="adm-chain">${esc(nm(c))} · ${chain(c)}</div>` : ""}
+        <div class="adm-name">${esc(fullName(v, VILLAGE_KM))}${km() ? ` <span class="muted">${esc(v.name_en)}</span>` : ` <span class="muted">${esc(v.name_km || "")}</span>`}</div>
+        ${c ? `<div class="adm-chain">${esc(fullName(c))} · ${chain(c)}</div>` : ""}
         <dl class="adm-dl"><dt>${t("adm_code")}</dt><dd class="num">${esc(v.code)}</dd></dl>`;
       return;
     }
@@ -189,7 +192,7 @@
     if (has.length) rows.push([t("adm_contains"), has.join(", ")]);
     rows.push([t("adm_code"), esc(r.code)]);
     el.innerHTML = `<div class="eyebrow">${esc(cls(r))}</div>
-      <div class="adm-name">${esc(nm(r))} <span class="muted">${esc(km() ? r.name_en : r.name_km)}</span></div>
+      <div class="adm-name">${esc(fullName(r))} <span class="muted">${esc(km() ? r.name_en : r.name_km)}</span></div>
       ${r.lvl !== "province" ? `<div class="adm-chain">${chain(r)}</div>` : ""}
       <dl class="adm-dl">${rows.map(([k, v]) => `<dt>${k}</dt><dd class="num">${v}</dd>`).join("")}</dl>`;
   }
@@ -212,7 +215,8 @@
   }
 
   // ---------- search (units from index.json, villages loaded on first search) ----------
-  const norm = (s) => (s || "").toLowerCase().normalize("NFC").replace(/\s+/g, " ").trim();
+  // Khmer subscript ta (្ត) and da (្ដ) are often swapped in spelling (កណ្តាល / កណ្ដាល), so search treats them as one.
+  const norm = (s) => (s || "").toLowerCase().normalize("NFC").replace(/\u17D2\u178F/g, "\u17D2\u178A").replace(/\s+/g, " ").trim();
   async function search(q) {
     q = norm(q); if (q.length < 2) return [];
     const out = [];
@@ -231,10 +235,10 @@
   function resultHTML(x, i) {
     if (x.kind === "unit") {
       const r = x.r;
-      return `<button type="button" class="adm-res" data-i="${i}"><b>${esc(nm(r))}</b> <span class="muted">${esc(cls(r))}${r.lvl !== "province" ? ` · ${chain(r)}` : ""}</span></button>`;
+      return `<button type="button" class="adm-res" data-i="${i}"><b>${esc(fullName(r))}</b> <span class="muted">${km() ? "" : esc(cls(r))}${r.lvl !== "province" ? `${km() ? "" : " · "}${chain(r)}` : ""}</span></button>`;
     }
     const v = x.v, c = S.byCode[`commune:${v.code.slice(0, 6)}`];
-    return `<button type="button" class="adm-res" data-i="${i}"><b>${esc(nm(v))}</b> <span class="muted">${t("adm_village")}${c ? ` · ${esc(nm(c))} · ${chain(c)}` : ""}</span></button>`;
+    return `<button type="button" class="adm-res" data-i="${i}"><b>${esc(fullName(v, VILLAGE_KM))}</b> <span class="muted">${km() ? "" : `${t("adm_village")} · `}${c ? `${esc(fullName(c))} · ${chain(c)}` : ""}</span></button>`;
   }
 
   function injectStyles() {

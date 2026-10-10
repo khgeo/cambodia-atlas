@@ -28,7 +28,7 @@
   panel.innerHTML = `<div><div class="eyebrow">${A.t("explorer")}</div><h1>${km ? "ស្រទាប់ទាំងអស់" : "All layers"}</h1></div>
     <p class="muted" style="margin:0">${km ? "បើក ឬបិទស្រទាប់ពីផែនទីនីមួយៗ ដើម្បីប្រៀបធៀបនៅលើផែនទីតែមួយ។" : "Turn layers from each plate on and off to compare them on one map."}</p>
     <div class="layer-group" id="layers"><p class="muted">${A.t("loading")}</p></div>`;
-  const map = await A.createMap(document.getElementById("map"), { center: [104.92, 11.56], zoom: 11, contextUrl: "shared/data/context-phnompenh.geojson" });
+  const map = await A.createMap(document.getElementById("map"), { center: [104.92, 11.56], zoom: 11 });
   const cat = await A.catalog();
   const live = cat.chapters.flatMap((c) => c.plates).filter((p) => p.status === "live");
   const box = document.getElementById("layers"); box.innerHTML = "";

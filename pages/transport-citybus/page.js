@@ -118,6 +118,8 @@
     bus_terminal: "Terminal for this direction", bus_none_left: "No more buses today", bus_est: "Estimated times",
     bus_clock: "Simulated time", bus_rate: "Playback speed", bus_assume: "Timetable assumptions", bus_sources: "Sources",
     bus_approx: "Approximate position", bus_running: "running",
+    bus_live: "Real time", bus_live_on: "Real time: Phnom Penh time now (UTC+7)",
+    bus_closed: "No buses at this hour: service runs 05:30–20:30.",
   });
   A.addStrings("km", {
     bus_line: "ខ្សែទី", bus_now: "រថយន្តកំពុងដំណើរការ", bus_play: "ចាក់", bus_pause: "ផ្អាក", bus_speed: "ល្បឿនមធ្យម",
@@ -126,11 +128,19 @@
     bus_terminal: "ចំណតចុងក្រោយសម្រាប់ទិសនេះ", bus_none_left: "អស់រថយន្តសម្រាប់ថ្ងៃនេះ", bus_est: "ពេលវេលាប៉ាន់ស្មាន",
     bus_clock: "ម៉ោងក្លែងធ្វើ", bus_rate: "ល្បឿនចាក់", bus_assume: "ការសន្មតនៃតារាងពេលវេលា", bus_sources: "ប្រភព",
     bus_approx: "ទីតាំងប៉ាន់ស្មាន", bus_running: "កំពុងរត់",
+    bus_live: "ពេលវេលាជាក់ស្ដែង", bus_live_on: "ពេលវេលាជាក់ស្ដែង៖ ម៉ោងភ្នំពេញឥឡូវនេះ (UTC+7)",
+    bus_closed: "ម៉ោងនេះគ្មានរថយន្តទេ៖ សេវាដំណើរការពីម៉ោង ០៥:៣០ ដល់ ២០:៣០។",
   });
   const t = A.t, esc = A.esc;
   const OFFSET = { "3": -3, "4A": -3.5, "4C": 3.5, "7": -3, "10": 3, "5A": -2 };
 
-  const S = { model: null, sch: {}, time: toMin("07:30"), playing: false, rate: 60, speed: 16, dwell: 20,
+  /** Minutes since midnight, Phnom Penh time (works wherever the viewer is). */
+  function nowPhnomPenh() {
+    const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Phnom_Penh", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" })
+      .formatToParts(new Date()).reduce((o, x) => ((o[x.type] = +x.value), o), {});
+    return parts.hour * 60 + parts.minute + parts.second / 60;
+  }
+  const S = { model: null, sch: {}, time: toMin("07:30"), playing: false, live: false, rate: 60, speed: 16, dwell: 20,
               hidden: new Set(), popup: null, popupStop: null, cfg: null };
 
   function rebuildSchedules() {
@@ -197,6 +207,10 @@
       .clock{display:grid;gap:10px;padding:14px;border:1px solid var(--rule);border-radius:6px;background:var(--paper)}
       .clock-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
       .clock-time{font:600 44px/1 var(--f-data);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+      .clock-note{font-size:12.5px;color:var(--muted)}
+      .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.45;margin-right:6px;vertical-align:1px}
+      #bus-live[aria-pressed="true"] .live-dot{background:#e5484d;opacity:1;animation:livepulse 1.6s ease-in-out infinite}
+      @keyframes livepulse{50%{opacity:.35}}
       .clock-meta{font-size:13px;color:var(--muted);line-height:1.3}.clock-meta b{color:var(--ink);font:600 18px var(--f-data)}
       .play{margin-left:auto;border:0;background:var(--ink);color:var(--paper);border-radius:999px;padding:8px 16px;font-weight:600;cursor:pointer}
       .clock input[type=range]{width:100%;accent-color:var(--accent)}
@@ -224,6 +238,14 @@
     map.addSource("bus-stops", { type: "geojson", data: stops });
     map.addSource("buses", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
     const lineIds = ["bus-line-casing", "bus-line", "bus-line-hi", "bus-stop", "bus-bus"];
+    // When the online base map can't load, show the 2014 road network the routes were traced on.
+    if (map.atlasOffline && ctx.meta.data.roads) {
+      map.addSource("bus-roads", { type: "geojson", data: ctx.base + ctx.meta.data.roads });
+      map.addLayer({ id: "bus-roads", type: "line", source: "bus-roads", layout: { "line-join": "round", "line-cap": "round" },
+        paint: { "line-color": A.cssVar("--muted") || "#888", "line-opacity": ["match", ["get", "cls"], "local", 0.3, 0.6],
+                 "line-width": ["interpolate", ["linear"], ["zoom"], 11, ["match", ["get", "cls"], "local", 0.4, 1], 15, ["match", ["get", "cls"], "local", 1.5, 3]] } });
+      lineIds.unshift("bus-roads");
+    }
     map.addLayer({ id: "bus-line-casing", type: "line", source: "bus-lines", layout: { "line-join": "round", "line-cap": "round" },
       paint: { "line-color": halo, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 4, 15, 10], "line-offset": ["get", "offset"] } });
     map.addLayer({ id: "bus-line", type: "line", source: "bus-lines", layout: { "line-join": "round", "line-cap": "round" },
@@ -299,14 +321,16 @@
     el.innerHTML = `
       <section class="clock" aria-label="${t("bus_clock")}">
         <div class="clock-top">
-          <div><div class="eyebrow">${t("bus_clock")}</div><div class="clock-time" id="bus-clock">--:--</div></div>
+          <div><div class="eyebrow" id="bus-clock-label">${t("bus_clock")}</div><div class="clock-time" id="bus-clock">--:--</div></div>
           <div class="clock-meta"><b id="bus-total" class="num">0</b><br>${t("bus_now")}</div>
           <button class="play" id="bus-play" type="button">${t("bus_play")}</button>
         </div>
         <input type="range" id="bus-time" min="300" max="1260" step="1" aria-label="${t("bus_clock")}">
         <div class="ticks num"><span>05:00</span><span>09:00</span><span>13:00</span><span>17:00</span><span>21:00</span></div>
         <div class="ctrl"><span class="muted">${t("bus_rate")}</span>
-          <div class="rates">${rates.map((r) => `<button type="button" class="chip-btn" data-rate="${r}" aria-pressed="${r === S.rate}">×${r}</button>`).join("")}</div></div>
+          <div class="rates">${rates.map((r) => `<button type="button" class="chip-btn" data-rate="${r}" aria-pressed="${r === S.rate}">×${r}</button>`).join("")}
+            <button type="button" class="chip-btn" id="bus-live" aria-pressed="false"><span class="live-dot"></span>${t("bus_live")}</button></div></div>
+        <div class="clock-note" id="bus-live-note" hidden></div>
       </section>
       <section class="ctrl" style="gap:10px">
         <h2>${t("bus_assume")}</h2>
@@ -334,10 +358,18 @@
 
     const playBtn = document.getElementById("bus-play");
     const setPlaying = (p) => { S.playing = p; playBtn.textContent = p ? t("bus_pause") : t("bus_play"); };
-    playBtn.onclick = () => setPlaying(!S.playing);
-    document.getElementById("bus-time").oninput = (e) => { S.time = +e.target.value; tick(map); };
+    const liveBtn = document.getElementById("bus-live"), liveNote = document.getElementById("bus-live-note");
+    const setLive = (on) => {
+      S.live = on; liveBtn.setAttribute("aria-pressed", on); liveNote.hidden = !on;
+      document.getElementById("bus-clock-label").textContent = on ? t("bus_live") : t("bus_clock");
+      el.querySelectorAll("[data-rate]").forEach((x) => x.setAttribute("aria-pressed", !on && +x.dataset.rate === S.rate));
+      if (on) { S.time = nowPhnomPenh(); setPlaying(true); tick(map); }
+    };
+    playBtn.onclick = () => { if (S.live) setLive(false); setPlaying(!S.playing); };
+    liveBtn.onclick = () => setLive(!S.live);
+    document.getElementById("bus-time").oninput = (e) => { if (S.live) setLive(false); S.time = +e.target.value; tick(map); };
     el.querySelectorAll("[data-rate]").forEach((b) => (b.onclick = () => {
-      S.rate = +b.dataset.rate; el.querySelectorAll("[data-rate]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+      S.rate = +b.dataset.rate; setLive(false);
     }));
     const onAssume = () => {
       S.speed = +document.getElementById("bus-speed").value; S.dwell = +document.getElementById("bus-dwell").value;
@@ -359,7 +391,11 @@
     let last = performance.now();
     const loop = (now) => {
       const dt = Math.min(0.25, (now - last) / 1000); last = now;
-      if (S.playing) { S.time += (dt * S.rate) / 60; if (S.time > 1260) S.time = 300; tick(map); }
+      if (S.live) {
+        S.time = nowPhnomPenh(); tick(map);
+        const open = S.time >= toMin(S.cfg.first_departure) && S.time <= toMin(S.cfg.last_arrival);
+        liveNote.textContent = open ? t("bus_live_on") : `${t("bus_live_on")}. ${t("bus_closed")}`;
+      } else if (S.playing) { S.time += (dt * S.rate) / 60; if (S.time > 1260) S.time = 300; tick(map); }
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);

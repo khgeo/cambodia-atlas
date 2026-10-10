@@ -13,11 +13,11 @@
   const STR = {
     en: { atlas: "Interactive Cambodia Atlas", contents: "Contents", explorer: "Explorer", plate: "Plate",
           live: "Live", planned: "Planned", prev: "Previous", next: "Next", back: "All plates",
-          offlineBasemap: "Offline base map: roads and labels appear when the site is online (GitHub Pages).",
+          offlineBasemap: "The online base map could not load, so only the atlas layers are shown.",
           layers: "Layers", loading: "Loading…", books: "Book" },
     km: { atlas: "អាត្លាសអន្តរកម្មកម្ពុជា", contents: "មាតិកា", explorer: "រុករកស្រទាប់", plate: "ផែនទីទី",
           live: "ដំណើរការ", planned: "គ្រោងនឹងធ្វើ", prev: "មុន", next: "បន្ទាប់", back: "ផែនទីទាំងអស់",
-          offlineBasemap: "ផែនទីមូលដ្ឋានក្រៅបណ្ដាញ៖ ផ្លូវ និងឈ្មោះទីកន្លែងនឹងបង្ហាញពេលគេហទំព័រនៅលើបណ្ដាញ។",
+          offlineBasemap: "មិនអាចផ្ទុកផែនទីមូលដ្ឋានតាមអ៊ីនធឺណិតបានទេ ដូច្នេះបង្ហាញតែស្រទាប់របស់អាត្លាស។",
           layers: "ស្រទាប់", loading: "កំពុងផ្ទុក…", books: "សៀវភៅ" },
   };
   function safeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -99,12 +99,14 @@
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
     map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
     await new Promise((res) => (map.loaded() ? res() : map.once("load", res)));
-    if (offline && contextUrl) {
+    if (offline) {
+      if (contextUrl) {
       map.addSource("context", { type: "geojson", data: contextUrl });
       map.addLayer({ id: "context-river", type: "line", source: "context", filter: ["==", ["get", "kind"], "river"],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": cssVar("--water"),
           "line-width": ["interpolate", ["exponential", 2], ["zoom"], 9, ["*", 4, ["get", "w"]], 14, ["*", 90, ["get", "w"]]] } });
+      }
       const note = document.createElement("div");
       note.className = "basemap-note"; note.textContent = Atlas.t("offlineBasemap");
       container.parentElement.appendChild(note);
