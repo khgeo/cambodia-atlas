@@ -56,10 +56,15 @@
   };
 
   // ---------------- data ----------------
-  Atlas.getJSON = async (url) => { const r = await fetch(url); if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); };
-  Atlas.getText = async (url) => { const r = await fetch(url); if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.text(); };
+  Atlas.getJSON = async (url) => { const r = await fetch(url + (/\?/.test(url) ? "" : Atlas.versionQuery())); if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); };
+  Atlas.getText = async (url) => { const r = await fetch(url + (/\?/.test(url) ? "" : Atlas.versionQuery())); if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.text(); };
   Atlas.catalog = () => Atlas.getJSON("pages/catalog.json");
 
+  /** "?v=…" from the page's <meta name="atlas-version">, so plate scripts and data skip stale browser caches. */
+  Atlas.versionQuery = () => {
+    const v = document.querySelector('meta[name="atlas-version"]')?.content;
+    return v ? `?v=${encodeURIComponent(v)}` : "";
+  };
   Atlas.register = (id, mod) => { pages[id] = mod; };
   /** Loads pages/<id>/page.json and page.js; resolves to { meta, mod, base }. */
   Atlas.loadPage = async function (id) {
@@ -69,7 +74,7 @@
     if (!pages[id]) {
       await new Promise((res, rej) => {
         const s = document.createElement("script");
-        s.src = base + "page.js"; s.onload = res; s.onerror = () => rej(new Error("page.js failed to load"));
+        s.src = base + "page.js" + Atlas.versionQuery(); s.onload = res; s.onerror = () => rej(new Error("page.js failed to load"));
         document.head.appendChild(s);
       });
     }
