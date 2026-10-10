@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atlas Plate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Kantumruy+Pro:wght@400;600&family=Moul&display=swap">
+<link rel="stylesheet" href="shared/vendor/maplibre-gl.css">
+<link rel="stylesheet" href="shared/atlas.css">
+</head>
+<body>
+<div class="plate-app">
+  <header class="bar" id="bar"></header>
+  <div class="plate-body">
+    <aside class="panel"><div class="panel-inner" id="panel"><p class="muted">Loading…</p></div></aside>
+    <div class="mapwrap"><div class="map" id="map"></div></div>
+  </div>
+</div>
+<script src="shared/vendor/maplibre-gl.js"></script>
+<script src="shared/atlas.js"></script>
+<script>
+(async () => {
+  const A = window.Atlas;
+  A.renderBar(document.getElementById("bar"));
+  const panel = document.getElementById("panel");
+  const id = (location.hash || "#transport-citybus").slice(1);
+  window.addEventListener("hashchange", () => location.reload());
+  try {
+    const [{ meta, mod, base }, cat] = await Promise.all([A.loadPage(id), A.catalog()]);
+    document.title = `${A.pick(meta, "title")} · ${A.t("atlas")}`;
+    // prev/next among live plates
+    const live = cat.chapters.flatMap((c) => c.plates).filter((p) => p.status === "live");
+    const i = live.findIndex((p) => p.id === id);
+    const prev = live[i - 1], next = live[i + 1];
+    const textFile = meta[`text_${A.lang}`] || meta.text_en;
+    const prose = textFile ? await A.getText(base + textFile) : "";
+    panel.innerHTML = `
+      <div><div class="eyebrow">${A.t("plate")} ${A.esc(meta.plate)} · ${A.esc(A.pick(meta, "chapter"))}</div>
+      <h1>${A.esc(A.pick(meta, "title"))}</h1></div>
+      <div class="prose">${prose}</div>
+      <div id="page-ui"></div>
+      <div class="book-tags">${(meta.books || []).map((b) => `<span class="book-tag">${A.t("books")}: ${A.esc(b)}</span>`).join("")}</div>
+      <nav class="plate-nav">
+        ${prev ? `<a href="page.html#${prev.id}">← ${A.esc(A.pick(prev, "title"))}</a>` : `<a href="index.html">← ${A.t("back")}</a>`}
+        ${next ? `<a href="page.html#${next.id}">${A.esc(A.pick(next, "title"))} →</a>` : `<span></span>`}
+      </nav>`;
+    const map = await A.createMap(document.getElementById("map"), { center: meta.center, zoom: meta.zoom, contextUrl: meta.context });
+    window.atlasMap = map; // handy for debugging in the browser console
+    const ctx = { base, meta, lang: A.lang };
+    await mod.addLayers(map, ctx);
+    if (mod.mountPanel) await mod.mountPanel(document.getElementById("page-ui"), map, ctx);
+  } catch (e) {
+    console.error(e);
+    panel.innerHTML = `<p class="note">This plate could not be loaded: ${A.esc(e.message)}</p><p><a href="index.html">← ${A.t("back")}</a></p>`;
+  }
+})();
+</script>
+</body>
+</html>

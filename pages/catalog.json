@@ -1,0 +1,37 @@
+{
+  "chapters": [
+    { "no": 1, "title_en": "Mapping Cambodia", "title_km": "ការធ្វើផែនទីកម្ពុជា",
+      "plates": [
+        { "no": "1.1", "id": "carto-projections", "status": "planned", "books": ["Cartography"],
+          "title_en": "Map projections and Cambodia's UTM zones", "title_km": "ប្រព័ន្ធប្រូជិចស្យុង និងតំបន់ UTM នៃកម្ពុជា",
+          "summary_en": "Drag a projection and watch Cambodia's shape and area change.", "summary_km": "ប្ដូរប្រូជិចស្យុង ហើយមើលការប្រែប្រួលរាង និងផ្ទៃក្រឡានៃកម្ពុជា។" },
+        { "no": "1.2", "id": "admin-units", "status": "planned", "books": ["Cartography", "GIS"],
+          "title_en": "Provinces, districts and communes", "title_km": "ខេត្ត ស្រុក និងឃុំ",
+          "summary_en": "The administrative hierarchy, with population choropleths.", "summary_km": "រចនាសម្ព័ន្ធរដ្ឋបាល ជាមួយផែនទីដង់ស៊ីតេប្រជាជន។" }
+      ] },
+    { "no": 2, "title_en": "Water and land", "title_km": "ទឹក និងដី",
+      "plates": [
+        { "no": "2.1", "id": "flood-pulse", "status": "planned", "books": ["Remote Sensing", "Applied GIS & RS"],
+          "title_en": "Mekong flood pulse from Sentinel-1", "title_km": "ជំនន់ទន្លេមេគង្គពីរូបភាព Sentinel-1",
+          "summary_en": "A time slider over SAR flood extents through one wet season.", "summary_km": "គ្រាប់រំកិលពេលវេលា បង្ហាញទឹកជំនន់ពីរូបភាព SAR ក្នុងរដូវវស្សាមួយ។" },
+        { "no": "2.2", "id": "riverbank-erosion", "status": "planned", "books": ["Applied GIS & RS"],
+          "title_en": "Riverbank erosion and accretion", "title_km": "ការហូរច្រោះ និងការកកកុញច្រាំងទន្លេ",
+          "summary_en": "Where the Mekong and Bassac banks have moved since the 1990s.", "summary_km": "តំបន់ដែលច្រាំងទន្លេមេគង្គ និងបាសាក់បានផ្លាស់ប្ដូរ។" }
+      ] },
+    { "no": 3, "title_en": "Agriculture", "title_km": "កសិកម្ម",
+      "plates": [
+        { "no": "3.1", "id": "rice-drought", "status": "planned", "books": ["Remote Sensing", "Applied GIS & RS"],
+          "title_en": "Rice drought in an El Niño year", "title_km": "គ្រោះរាំងស្ងួតលើស្រូវក្នុងឆ្នាំអែលនីញ៉ូ",
+          "summary_en": "Vegetation health index over the rice plains, season by season.", "summary_km": "សន្ទស្សន៍សុខភាពរុក្ខជាតិលើវាលស្រែ តាមរដូវ។" }
+      ] },
+    { "no": 4, "title_en": "Cities and transport", "title_km": "ទីក្រុង និងការដឹកជញ្ជូន",
+      "plates": [
+        { "no": "4.1", "id": "transport-citybus", "status": "live", "books": ["GIS", "Applied GIS & RS"],
+          "title_en": "Phnom Penh City Bus", "title_km": "រថយន្តក្រុងរាជធានីភ្នំពេញ",
+          "summary_en": "13 bus lines and 434 stops, with a live simulation of buses through the day.", "summary_km": "ខ្សែរថយន្តក្រុង ១៣ និងចំណតជាង ៤០០ ជាមួយការក្លែងធ្វើចលនារថយន្តពេញមួយថ្ងៃ។" },
+        { "no": "4.2", "id": "pp-landcover-2025", "status": "planned", "books": ["Remote Sensing", "Applied GIS & RS"],
+          "title_en": "Phnom Penh land cover 2025", "title_km": "គម្របដីភ្នំពេញ ឆ្នាំ ២០២៥",
+          "summary_en": "Six land-cover classes, with a swipe against an older map.", "summary_km": "ថ្នាក់គម្របដីប្រាំមួយ ជាមួយការប្រៀបធៀបនឹងផែនទីចាស់។" }
+      ] }
+  ]
+}

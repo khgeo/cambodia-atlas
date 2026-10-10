@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Interactive Cambodia Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Kantumruy+Pro:wght@400;600&family=Moul&display=swap">
+<link rel="stylesheet" href="shared/atlas.css">
+</head>
+<body>
+<header class="bar" id="bar"></header>
+<main class="cover">
+  <div class="cover-head">
+    <div>
+      <div class="eyebrow" id="eyebrow">Plate index</div>
+      <p class="cover-title-km">អាត្លាសអន្តរកម្មកម្ពុជា</p>
+      <h1 class="cover-title-en">Interactive Cambodia Atlas</h1>
+    </div>
+    <div>
+      <p class="cover-lede" id="lede"></p>
+      <div class="cover-meta" id="meta"></div>
+    </div>
+  </div>
+  <div class="chapters" id="chapters"><p class="muted">Loading…</p></div>
+  <footer class="cover-foot">
+    <span id="credit"></span>
+    <span><a href="https://github.com/khgeo">github.com/khgeo</a></span>
+  </footer>
+</main>
+<script src="shared/atlas.js"></script>
+<script>
+(async () => {
+  const A = window.Atlas, km = A.lang === "km";
+  A.renderBar(document.getElementById("bar"));
+  document.getElementById("eyebrow").textContent = km ? "បញ្ជីផែនទី" : "Plate index";
+  document.getElementById("lede").textContent = km
+    ? "ផែនទីអន្តរកម្មនៃប្រទេសកម្ពុជា សម្រាប់សិក្សាផែនទីវិទ្យា ប្រព័ន្ធព័ត៌មានភូមិសាស្ត្រ និងទូរសម្បទា។ ផែនទីនីមួយៗភ្ជាប់ទៅនឹងជំពូកក្នុងសៀវភៅសិក្សា។"
+    : "Interactive maps of Cambodia for learning cartography, GIS and remote sensing. Each plate pairs a live map with a short reading and links to the matching chapter of the textbook series.";
+  document.getElementById("credit").textContent = km ? "រៀបចំដោយ យាំ សារដ្ឋ · ដេប៉ាតឺម៉ង់ភូមិវិទ្យា សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ" : "Compiled by YAM Sarath · Department of Geography and Land Management, RUPP";
+  try {
+    const cat = await A.catalog();
+    const all = cat.chapters.flatMap((c) => c.plates);
+    const live = all.filter((p) => p.status === "live").length;
+    document.getElementById("meta").innerHTML =
+      `<span><b class="num">${cat.chapters.length}</b>${km ? "ជំពូក" : "chapters"}</span>
+       <span><b class="num">${all.length}</b>${km ? "ផែនទី" : "plates"}</span>
+       <span><b class="num">${live}</b>${km ? "ដំណើរការ" : "live"}</span>`;
+    document.getElementById("chapters").innerHTML = cat.chapters.map((c) => `
+      <section class="chapter">
+        <div class="chapter-label"><div class="ch-num num">${String(c.no).padStart(2, "0")}</div><h2>${A.esc(A.pick(c, "title"))}</h2></div>
+        <div class="plates">${c.plates.map((p) => {
+          const isLive = p.status === "live";
+          const tag = isLive ? "a" : "div";
+          const href = isLive ? ` href="page.html#${p.id}"` : "";
+          return `<${tag} class="plate ${isLive ? "" : "planned"}"${href}>
+            <div class="plate-no"><span>${A.t("plate")} ${p.no}</span><span class="status ${p.status}">${A.t(p.status)}</span></div>
+            <div><h3>${A.esc(A.pick(p, "title"))}</h3><p>${A.esc(A.pick(p, "summary"))}</p></div>
+            <div class="book-tags">${(p.books || []).map((b) => `<span class="book-tag">${A.esc(b)}</span>`).join("")}</div>
+          </${tag}>`; }).join("")}
+        </div>
+      </section>`).join("");
+  } catch (e) {
+    document.getElementById("chapters").innerHTML = `<p class="note">Could not load the plate list (${A.esc(e.message)}). Open the atlas through a web server, not as a local file.</p>`;
+  }
+})();
+</script>
+</body>
+</html>

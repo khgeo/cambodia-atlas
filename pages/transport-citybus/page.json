@@ -1,0 +1,30 @@
+{
+  "id": "transport-citybus",
+  "plate": "4.1",
+  "chapter_en": "Cities and transport",
+  "chapter_km": "ទីក្រុង និងការដឹកជញ្ជូន",
+  "title_en": "Phnom Penh City Bus",
+  "title_km": "រថយន្តក្រុងរាជធានីភ្នំពេញ",
+  "books": ["GIS", "Applied GIS & RS"],
+  "center": [104.905, 11.565],
+  "zoom": 11.2,
+  "context": "shared/data/context-phnompenh.geojson",
+  "text_en": "text.en.html",
+  "text_km": "text.km.html",
+  "data": {
+    "lines": "data/lines.geojson",
+    "stops": "data/stops.geojson"
+  },
+  "timetable": {
+    "first_departure": "05:30",
+    "last_arrival": "20:30",
+    "avg_speed_kmh": 16,
+    "dwell_s": 20,
+    "source": "Operating hours and headways from the Phnom Penh City Bus Route Map 2020 brochure. Per-stop times are estimated from distance and an assumed average speed."
+  },
+  "sources": [
+    { "name": "Phnom Penh City Bus Route Map 2020 (Phnom Penh Capital Hall, JICA)", "url": "https://www.facebook.com/phnompenhcitybus.gov.kh/" },
+    { "name": "Open Development Cambodia: Public transportation", "url": "https://data.opendevelopmentmekong.net/dataset/public-transportation-cambodia" },
+    { "name": "OpenStreetMap contributors", "url": "https://www.openstreetmap.org/copyright" }
+  ]
+}
