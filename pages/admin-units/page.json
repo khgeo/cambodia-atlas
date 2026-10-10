@@ -19,7 +19,8 @@
   "data": {
     "tiles": "data/admin.pmtiles",
     "index": "data/index.json",
-    "villages": "data/villages.json"
+    "villages": "data/villages.json",
+    "tiles2014": "data/admin2014.pmtiles"
   },
   "sources": [
     {
@@ -27,8 +28,16 @@
       "url": "https://github.com/khgeo/cambodia-atlas"
     },
     {
+      "name": "2014 boundaries (comparison): Open Development Cambodia via geoBoundaries KHM ADM2/ADM3 (CC BY 4.0)",
+      "url": "https://www.geoboundaries.org/countryDownloads.html"
+    },
+    {
       "name": "Population: Cambodia Inter-censal Population Survey 2024, National Institute of Statistics",
       "url": "https://cambodia.unfpa.org/en/publications/cambodia-inter-censal-population-survey-2024-final-report"
     }
+  ],
+  "geolibre": [
+    "data/admin.pmtiles",
+    "data/admin2014.pmtiles"
   ]
 }

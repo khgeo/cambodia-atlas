@@ -10,6 +10,9 @@
     adm_click: "Click any unit or village on the map to see where it belongs.", adm_rank: "#", adm_value: "Value",
     adm_contains: "Contains", adm_code: "Code", adm_village: "Village", adm_noresult: "No match",
     adm_show_vill: "Show villages (zoom in past level 10)",
+    adm_compare: "Compare with 2014", adm_compare_on: "Comparing 2014 ↔ 2024",
+    adm_compare_note: "Drag the slider. Left: 2014 boundaries (Open Development Cambodia). Right: 2024. Both are coloured by area, so a unit that was split or merged shows up as a change in colour and shape.",
+    adm_2014_counts: "2014: 197 districts, 1,633 communes. 2024: 209 districts, 1,653 communes.",
   });
   A.addStrings("km", {
     adm_level: "កម្រិត", adm_province: "ខេត្ត", adm_district: "ស្រុក", adm_commune: "ឃុំ",
@@ -20,6 +23,9 @@
     adm_click: "ចុចលើអង្គភាព ឬភូមិណាមួយនៅលើផែនទី ដើម្បីមើលថាវាស្ថិតនៅក្នុងខេត្ត ឬស្រុកណា។", adm_rank: "#", adm_value: "តម្លៃ",
     adm_contains: "មាន", adm_code: "លេខកូដ", adm_village: "ភូមិ", adm_noresult: "រកមិនឃើញ",
     adm_show_vill: "បង្ហាញភូមិ (ពង្រីកលើសកម្រិត ១០)",
+    adm_compare: "ប្រៀបធៀបជាមួយឆ្នាំ២០១៤", adm_compare_on: "កំពុងប្រៀបធៀប ២០១៤ ↔ ២០២៤",
+    adm_compare_note: "អូសរបាររំកិល។ ខាងឆ្វេង៖ ព្រំប្រទល់ឆ្នាំ២០១៤ (Open Development Cambodia)។ ខាងស្ដាំ៖ ឆ្នាំ២០២៤។ ទាំងពីរដាក់ពណ៌តាមផ្ទៃក្រឡា ដូច្នេះអង្គភាពដែលត្រូវបានបំបែក ឬបញ្ចូលគ្នា បង្ហាញជាការប្រែប្រួលពណ៌ និងរាង។",
+    adm_2014_counts: "ឆ្នាំ២០១៤៖ ស្រុក/ក្រុង/ខណ្ឌ ១៩៧ ឃុំ/សង្កាត់ ១.៦៣៣។ ឆ្នាំ២០២៤៖ ស្រុក/ក្រុង/ខណ្ឌ ២០៩ ឃុំ/សង្កាត់ ១.៦៥៣។",
   });
 
   const LEVELS = ["province", "district", "commune"];
@@ -74,6 +80,16 @@
       map.addLayer({ id: `adm-line-${lvl}`, type: "line", source: "adm", "source-layer": sl, layout: { visibility: vis, "line-join": "round" },
         paint: { "line-color": surface, "line-width": lvl === "commune" ? ["interpolate", ["linear"], ["zoom"], 6, 0.2, 12, 1] : ["interpolate", ["linear"], ["zoom"], 6, 0.6, 12, 1.6] } });
       ids.push(`adm-fill-${lvl}`, `adm-line-${lvl}`);
+    }
+    // 2014 boundaries for the swipe comparison (hidden until "Compare with 2014" is on)
+    if (ctx.meta.data.tiles2014 && !ctx.explorer) {
+      map.addSource("adm14", { type: "vector", url: A.pmtilesUrl(ctx.base + ctx.meta.data.tiles2014), attribution: "2014 boundaries: Open Development Cambodia" });
+      for (const lvl of LEVELS) {
+        map.addLayer({ id: `adm14-fill-${lvl}`, type: "fill", source: "adm14", "source-layer": LAYER[lvl], layout: { visibility: "none" },
+          paint: { "fill-color": fillExpr(lvl, "area_km2"), "fill-opacity": 0.8 } });
+        map.addLayer({ id: `adm14-line-${lvl}`, type: "line", source: "adm14", "source-layer": LAYER[lvl], layout: { visibility: "none", "line-join": "round" },
+          paint: { "line-color": surface, "line-width": lvl === "commune" ? ["interpolate", ["linear"], ["zoom"], 6, 0.2, 12, 1] : ["interpolate", ["linear"], ["zoom"], 6, 0.6, 12, 1.6] } });
+      }
     }
     map.addLayer({ id: "adm-lake", type: "fill", source: "adm", "source-layer": "lake", paint: { "fill-color": A.cssVar("--water") } });
     map.addLayer({ id: "adm-dist-outline", type: "line", source: "adm", "source-layer": "districts", minzoom: 7,
@@ -134,6 +150,44 @@
     return ids;
   }
 
+  // ---------- 2014 ↔ 2024 swipe (maplibre-gl-swipe) ----------
+  function stopCompare() {
+    if (S.swipe) { try { S.map.removeControl(S.swipe); } catch (e) {} S.swipe = null; }
+    for (const l of LEVELS) for (const k of ["fill", "line"]) S.map.getLayer(`adm14-${k}-${l}`) && S.map.setLayoutProperty(`adm14-${k}-${l}`, "visibility", "none");
+    document.querySelectorAll(".adm-year-tag").forEach((e) => e.remove());
+    applyLevelVisibility();
+  }
+  /** The control does not restore what it hid, so the plate re-applies its own layer visibility. */
+  function applyLevelVisibility() {
+    const map = S.map, set = (id, v) => map.getLayer(id) && map.setLayoutProperty(id, "visibility", v ? "visible" : "none");
+    for (const l of LEVELS) { set(`adm-fill-${l}`, l === S.level); set(`adm-line-${l}`, l === S.level); set(`adm-sel-${l}`, true); }
+    set("adm-dist-outline", S.level === "commune");
+    for (const id of ["adm-lake", "adm-prov-outline", "adm-villages"]) set(id, true);
+    for (const [id, v] of Object.entries(S.baseVis || {})) map.getLayer(id) && map.setLayoutProperty(id, "visibility", v);
+  }
+  function startCompare() {
+    const map = S.map, lvl = S.level;
+    stopCompare();
+    if (S.metric !== "area_km2") { S.metric = "area_km2"; map.setPaintProperty(`adm-fill-${lvl}`, "fill-color", fillExpr(lvl, S.metric)); renderControls(); }
+    const base = map.getStyle().layers.map((l) => l.id).filter((id) => !id.startsWith("adm"));
+    S.baseVis = Object.fromEntries(base.map((id) => [id, map.getLayoutProperty(id, "visibility") || "visible"]));
+    const left = [...base, `adm14-fill-${lvl}`, `adm14-line-${lvl}`, "adm-lake"];
+    const right = [...base, `adm-fill-${lvl}`, `adm-line-${lvl}`, "adm-lake", "adm-prov-outline", `adm-sel-${lvl}`,
+                   ...(lvl === "commune" ? ["adm-dist-outline", "adm-villages"] : [])];
+    S.swipe = new MaplibreSwipe.SwipeControl({ orientation: "vertical", position: 50, showPanel: false, leftLayers: left, rightLayers: right });
+    map.addControl(S.swipe, "top-left");
+    const wrap = map.getContainer().parentElement;
+    for (const [side, year] of [["left", "2014"], ["right", "2024"]]) {
+      const tag = document.createElement("div"); tag.className = `adm-year-tag ${side}`; tag.textContent = year; wrap.appendChild(tag);
+    }
+  }
+  function setCompare(on) {
+    S.compare = on;
+    const b = document.getElementById("adm-compare"); if (b) b.setAttribute("aria-pressed", on);
+    const n = document.getElementById("adm-compare-note"); if (n) n.hidden = !on;
+    on ? startCompare() : stopCompare();
+  }
+
   function setLevel(lvl) {
     const map = S.map; S.level = lvl;
     if (!METRICS[lvl].includes(S.metric)) S.metric = METRICS[lvl][0];
@@ -144,6 +198,7 @@
     map.setLayoutProperty("adm-dist-outline", "visibility", lvl === "commune" ? "visible" : "none");
     map.setPaintProperty(`adm-fill-${lvl}`, "fill-color", fillExpr(lvl, S.metric));
     S.toggleLabels(); renderControls();
+    if (S.compare) startCompare();
   }
 
   function clearSel() { for (const l of LEVELS) S.map.setFilter(`adm-sel-${l}`, ["==", ["get", "code"], "-"]); }
@@ -261,6 +316,11 @@
       .adm-table td{padding:4px 10px;border-bottom:1px solid var(--rule)}.adm-table tr[data-code]{cursor:pointer}.adm-table tr[data-code]:hover{background:var(--paper)}
       .adm-table .r{text-align:right}.adm-tip .maplibregl-popup-content{padding:6px 10px;font-size:13px}
       .map-label-sm{font-size:11px;font-weight:400;padding:0 4px}
+      .adm-compare-btn{justify-self:start;padding:6px 14px;font-weight:600}
+      .adm-compare-note{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5}
+      .adm-year-tag{position:absolute;top:10px;z-index:5;pointer-events:none;font:600 15px/1 var(--f-data);letter-spacing:.06em;
+        background:var(--ink);color:var(--paper);padding:5px 10px;border-radius:4px}
+      .adm-year-tag.left{left:10px}.adm-year-tag.right{right:56px}
     `;
     document.head.appendChild(st);
   }
@@ -268,7 +328,7 @@
   function mountPanel(el) {
     injectStyles();
     const counts = { province: 0, district: 0, commune: 0 };
-    for (const r of S.index) counts[r.lvl]++;
+    for (const r of S.index) if (r.class_en !== "Island") counts[r.lvl]++;  // island parts belong to a commune already counted
     el.innerHTML = `
       <section class="adm-ctrl"><label for="adm-search">${t("adm_find")}</label>
         <input id="adm-search" type="search" placeholder="${t("adm_find_ph")}" autocomplete="off">
@@ -277,11 +337,15 @@
       <section class="adm-ctrl"><label>${t("adm_level")}</label>
         <div class="adm-seg" id="adm-levels">${LEVELS.map((l) =>
           `<button type="button" class="chip-btn" data-level="${l}">${t("adm_" + l)} <span class="num muted">${nf(counts[l])}</span></button>`).join("")}</div></section>
+      ${S.map.getSource("adm14") ? `<section class="adm-ctrl">
+        <button type="button" class="chip-btn adm-compare-btn" id="adm-compare" aria-pressed="false">⇆ ${t("adm_compare")}</button>
+        <p class="adm-compare-note" id="adm-compare-note" hidden>${t("adm_compare_note")}<br><span class="num">${t("adm_2014_counts")}</span></p></section>` : ""}
       <section class="adm-ctrl"><label for="adm-metric">${t("adm_colour")}</label><select id="adm-metric"></select>
         <div class="adm-legend" id="adm-legend"></div></section>
       <section class="adm-ctrl"><h2>${t("adm_table")}</h2><div class="adm-table" id="adm-table"></div></section>`;
     document.getElementById("adm-levels").querySelectorAll("button").forEach((b) => (b.onclick = () => setLevel(b.dataset.level)));
-    document.getElementById("adm-metric").onchange = (e) => { S.metric = e.target.value; S.map.setPaintProperty(`adm-fill-${S.level}`, "fill-color", fillExpr(S.level, S.metric)); renderControls(); };
+    const cmp = document.getElementById("adm-compare"); if (cmp) cmp.onclick = () => setCompare(!S.compare);
+    document.getElementById("adm-metric").onchange = (e) => { if (S.compare && e.target.value !== "area_km2") setCompare(false); S.metric = e.target.value; S.map.setPaintProperty(`adm-fill-${S.level}`, "fill-color", fillExpr(S.level, S.metric)); renderControls(); };
     const input = document.getElementById("adm-search"), box = document.getElementById("adm-results");
     let seq = 0, results = [];
     input.oninput = async () => {

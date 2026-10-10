@@ -14,11 +14,15 @@
     en: { atlas: "Interactive Cambodia Atlas", contents: "Contents", explorer: "Explorer", plate: "Plate",
           live: "Live", planned: "Planned", prev: "Previous", next: "Next", back: "All plates",
           offlineBasemap: "The online base map could not load, so only the atlas layers are shown.",
-          layers: "Layers", loading: "Loading…", books: "Book" },
+          layers: "Layers", loading: "Loading…", books: "Book",
+          geolibre: "Open the data in GeoLibre", geolibreNote: "Analyse these layers in GeoLibre, a free GIS that runs in the browser: buffers, overlays, statistics and 1,000+ more tools. Nothing to install.",
+          geolibreLocal: "Works once the atlas is online (GitHub Pages); GeoLibre can't read files from this computer's local server." },
     km: { atlas: "អាត្លាសអន្តរកម្មកម្ពុជា", contents: "មាតិកា", explorer: "រុករកស្រទាប់", plate: "ផែនទីទី",
           live: "ដំណើរការ", planned: "គ្រោងនឹងធ្វើ", prev: "មុន", next: "បន្ទាប់", back: "ផែនទីទាំងអស់",
           offlineBasemap: "មិនអាចផ្ទុកផែនទីមូលដ្ឋានតាមអ៊ីនធឺណិតបានទេ ដូច្នេះបង្ហាញតែស្រទាប់របស់អាត្លាស។",
-          layers: "ស្រទាប់", loading: "កំពុងផ្ទុក…", books: "សៀវភៅ" },
+          layers: "ស្រទាប់", loading: "កំពុងផ្ទុក…", books: "សៀវភៅ",
+          geolibre: "បើកទិន្នន័យក្នុង GeoLibre", geolibreNote: "វិភាគស្រទាប់ទាំងនេះក្នុង GeoLibre ដែលជាកម្មវិធី GIS ឥតគិតថ្លៃ ដំណើរការក្នុងកម្មវិធីរុករក៖ buffer, overlay, ស្ថិតិ និងឧបករណ៍ជាង ១.០០០ ទៀត។ មិនចាំបាច់ដំឡើងទេ។",
+          geolibreLocal: "ដំណើរការនៅពេលអាត្លាសនៅលើបណ្ដាញ (GitHub Pages)។ GeoLibre មិនអាចអានឯកសារពីម៉ាស៊ីនមេក្នុងកុំព្យូទ័រនេះបានទេ។" },
   };
   function safeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function safeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -125,6 +129,15 @@
   Atlas.htmlLabel = (map, lngLat, text, anchor = "left") => {
     const el = document.createElement("div"); el.className = "map-label"; el.textContent = text;
     return new maplibregl.Marker({ element: el, anchor, offset: anchor === "left" ? [8, 0] : [0, 0] }).setLngLat(lngLat).addTo(map);
+  };
+
+  /** "Open in GeoLibre" link for a plate's data files (https://web.geolibre.app, MIT, opengeos/GeoLibre). */
+  Atlas.GEOLIBRE_WEB = "https://web.geolibre.app/";
+  Atlas.geolibreUrl = (base, files) => {
+    const q = new URLSearchParams();
+    for (const f of files) q.append("data", new URL(base + f, location.href).href);
+    if (Atlas.lang === "km") q.set("theme", "light");
+    return Atlas.GEOLIBRE_WEB + "?" + q.toString();
   };
 
   Atlas.esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

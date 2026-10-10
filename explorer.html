@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Kantumruy+Pro:wght@400;600&family=Moul&display=swap">
 <link rel="stylesheet" href="shared/vendor/maplibre-gl.css">
+<link rel="stylesheet" href="shared/vendor/maplibre-gl-swipe.css">
 <link rel="stylesheet" href="shared/atlas.css">
 </head>
 <body>
@@ -17,10 +18,11 @@
     <div class="mapwrap"><div class="map" id="map"></div></div>
   </div>
 </div>
-<script src="shared/vendor/maplibre-gl.js"></script>
-<script src="shared/vendor/pmtiles.js"></script>
-<script src="shared/atlas.js"></script>
-<script>
+<!-- MapLibre 6 ships as ES modules: libs.mjs loads it and sets window.maplibregl / pmtiles / MaplibreSwipe.
+     Module scripts run in document order, so the scripts below see those globals. -->
+<script type="module" src="shared/vendor/libs.mjs"></script>
+<script type="module" src="shared/atlas.js"></script>
+<script type="module">
 (async () => {
   const A = window.Atlas, km = A.lang === "km";
   A.renderBar(document.getElementById("bar"));

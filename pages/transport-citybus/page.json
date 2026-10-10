@@ -45,5 +45,10 @@
       "name": "OpenStreetMap contributors",
       "url": "https://www.openstreetmap.org/copyright"
     }
+  ],
+  "geolibre": [
+    "data/lines.geojson",
+    "data/stops.geojson",
+    "data/roads.geojson"
   ]
 }

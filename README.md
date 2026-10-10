@@ -28,6 +28,10 @@ npx http-server -p 8000      # then open http://localhost:8000
 | 4.1 Phnom Penh City Bus | live | `pages/transport-citybus/` |
 | 1.1, 2.1, 2.2, 3.1, 4.2 | planned | listed in `pages/catalog.json` |
 
+## Open in GeoLibre
+
+Each plate can list data files under `"geolibre"` in its `page.json`. The plate then shows an **Open the data in GeoLibre** button, which opens those files in [GeoLibre](https://web.geolibre.app/) (free, MIT, browser-based GIS from opengeos) for analysis. The link uses GeoLibre's `data=` parameter. It works once the atlas is on GitHub Pages; GeoLibre cannot read files from a local test server.
+
 ## Add a new plate
 
 1. Make a folder `pages/<plate-id>/` (lowercase letters, numbers and hyphens).
@@ -56,6 +60,7 @@ Large rasters (land cover, flood extents) should be stored as PMTiles or Cloud-O
 - **Format:** served at full detail as vector tiles in one file, `pages/admin-units/data/admin.pmtiles` (14 MB; GitHub Pages supports the HTTP range requests PMTiles needs). `index.json` holds names, codes, parents, areas and counts for search and the ranked table. `villages.json` is loaded only when someone searches.
 - **Areas:** computed in UTM 48N, without the Tonle Sap lake.
 - **Population:** province totals from the Cambodia Inter-censal Population Survey 2024 (NIS), as tabulated on Wikipedia's *Provinces of Cambodia*. Check them against the NIS report before you cite them.
+- **2014 ↔ 2024 swipe:** `admin2014.pmtiles` holds the 2014 districts and communes from Open Development Cambodia (via geoBoundaries, CC BY 4.0), with provinces made by merging districts. Rebuild it with `python3 tools/build_admin_2014.py <folder> path/to/tippecanoe`.
 - **Rebuild:** `python3 tools/build_admin_2024.py <folder with PB_2024/ DB_2024/ CB_2024/ VC_2024/> path/to/tippecanoe`. This needs Node.js for mapshaper and [tippecanoe](https://github.com/felt/tippecanoe).
 
 ## The City Bus plate: data and what is estimated
@@ -89,6 +94,6 @@ Both assumptions can be changed in the page.
 
 ## Credits
 
-MapLibre GL JS (BSD-3) and PMTiles (BSD-3), vendored in `shared/vendor/`. Online base map from OpenFreeMap / OpenMapTiles, © OpenStreetMap contributors. If the base map cannot be reached, the atlas falls back to a plain background with the main rivers. Fonts: Kantumruy Pro, Moul, Barlow Condensed (Google Fonts).
+MapLibre GL JS 6 (BSD-3), PMTiles 4 (BSD-3) and maplibre-gl-swipe (MIT, opengeos), vendored in `shared/vendor/`. Rebuild them with `bash tools/vendor/build.sh`. MapLibre 6 ships only as ES modules, so the pages load `shared/vendor/libs.mjs` as a module, and it sets the `maplibregl`, `pmtiles` and `MaplibreSwipe` globals the plates use. Online base map from OpenFreeMap / OpenMapTiles, © OpenStreetMap contributors. If the base map cannot be reached, the atlas falls back to a plain background with the main rivers. Fonts: Kantumruy Pro, Moul, Barlow Condensed (Google Fonts).
 
 Compiled by YAM Sarath (personal project).

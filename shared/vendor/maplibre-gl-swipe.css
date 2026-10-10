@@ -1,0 +1,509 @@
+/**
+ * MapLibre GL Swipe Control Styles
+ *
+ * The button and panel colors are CSS custom properties so they adapt to light
+ * and dark color schemes. The scheme follows `prefers-color-scheme` by default
+ * and can be forced with the `.swipe-theme-light` / `.swipe-theme-dark` classes
+ * (set via the `theme` option or `setTheme()`). The slider is a map overlay and
+ * keeps one look in both schemes.
+ */
+
+.swipe-control,
+.swipe-control-panel {
+  --swipe-bg: #ffffff;
+  --swipe-header-bg: #fafafa;
+  --swipe-fg: #1f2a37;
+  --swipe-text: #333333;
+  --swipe-label: #555555;
+  --swipe-muted: #999999;
+  --swipe-border: #e0e0e0;
+  --swipe-border-subtle: #eeeeee;
+  --swipe-input-bg: #ffffff;
+  --swipe-input-border: #dddddd;
+  --swipe-input-border-hover: #bbbbbb;
+  --swipe-list-bg: #fafafa;
+  --swipe-hover: rgba(0, 0, 0, 0.05);
+  --swipe-item-hover: #f0f0f0;
+  --swipe-accent: #4a90d9;
+  --swipe-track: #cccccc;
+  --swipe-scrollbar: #cccccc;
+  --swipe-scrollbar-hover: #aaaaaa;
+  --swipe-ring: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark scheme via system preference (unless a scheme is forced) */
+@media (prefers-color-scheme: dark) {
+  .swipe-control:not(.swipe-theme-light),
+  .swipe-control-panel:not(.swipe-theme-light) {
+    --swipe-bg: #1f2733;
+    --swipe-header-bg: #1a212b;
+    --swipe-fg: #e8edf3;
+    --swipe-text: #dde3ea;
+    --swipe-label: #9aa5b1;
+    --swipe-muted: #8b96a3;
+    --swipe-border: #38424e;
+    --swipe-border-subtle: #2f3843;
+    --swipe-input-bg: #2a3441;
+    --swipe-input-border: #46515e;
+    --swipe-input-border-hover: #5d6b7a;
+    --swipe-list-bg: #252e3a;
+    --swipe-hover: rgba(255, 255, 255, 0.08);
+    --swipe-item-hover: #2f3946;
+    --swipe-accent: #6aaae4;
+    --swipe-track: #4a5663;
+    --swipe-scrollbar: #4a5663;
+    --swipe-scrollbar-hover: #5d6b7a;
+    --swipe-ring: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+}
+}
+
+/* Forced dark scheme */
+.swipe-control.swipe-theme-dark,
+.swipe-control-panel.swipe-theme-dark {
+  --swipe-bg: #1f2733;
+  --swipe-header-bg: #1a212b;
+  --swipe-fg: #e8edf3;
+  --swipe-text: #dde3ea;
+  --swipe-label: #9aa5b1;
+  --swipe-muted: #8b96a3;
+  --swipe-border: #38424e;
+  --swipe-border-subtle: #2f3843;
+  --swipe-input-bg: #2a3441;
+  --swipe-input-border: #46515e;
+  --swipe-input-border-hover: #5d6b7a;
+  --swipe-list-bg: #252e3a;
+  --swipe-hover: rgba(255, 255, 255, 0.08);
+  --swipe-item-hover: #2f3946;
+  --swipe-accent: #6aaae4;
+  --swipe-track: #4a5663;
+  --swipe-scrollbar: #4a5663;
+  --swipe-scrollbar-hover: #5d6b7a;
+  --swipe-ring: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+/* ============================================
+   Control Button (Toggle)
+   ============================================ */
+.swipe-control {
+  background: var(--swipe-bg);
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--swipe-ring);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.swipe-control-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  width: 29px;
+  height: 29px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  color: var(--swipe-fg);
+}
+
+.swipe-control-toggle:hover {
+  background-color: var(--swipe-hover);
+}
+
+.swipe-control-toggle:focus {
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.4);
+}
+
+.swipe-control-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swipe-control-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ============================================
+   Slider
+   ============================================ */
+.swipe-slider {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.swipe-slider-vertical {
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  border-left: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  cursor: ew-resize;
+  transform: translateX(-50%) translateZ(0);
+  will-change: left;
+  backface-visibility: hidden;
+}
+
+.swipe-slider-horizontal {
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  border-top: 1px solid rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  cursor: ns-resize;
+  transform: translateY(-50%) translateZ(0);
+  will-change: top;
+  backface-visibility: hidden;
+}
+
+.swipe-slider-handle {
+  position: absolute;
+  pointer-events: auto;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  width: 32px;
+  height: 32px;
+}
+
+.swipe-slider-vertical .swipe-slider-handle {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: ew-resize;
+}
+
+.swipe-slider-horizontal .swipe-slider-handle {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  cursor: ns-resize;
+}
+
+.swipe-slider-handle:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.swipe-slider.dragging .swipe-slider-handle {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.1s ease;
+}
+
+.swipe-slider-horizontal.dragging .swipe-slider-handle {
+  transform: translate(-50%, -50%) rotate(90deg) scale(1.1);
+  transition: box-shadow 0.1s ease;
+}
+
+/* Locked slider: shown when the swipe tool is inactive. The split view stays
+   frozen in place, but the handle is dimmed and dragging is disabled. */
+.swipe-slider-locked .swipe-slider-handle {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.swipe-slider-locked .swipe-slider-handle:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.swipe-handle-icon {
+  color: #666;
+  transition: color 0.1s ease;
+}
+
+.swipe-slider:hover .swipe-handle-icon,
+.swipe-slider.dragging .swipe-handle-icon {
+  color: #333;
+}
+
+/* ============================================
+   Panel
+   ============================================ */
+.swipe-control-panel {
+  position: absolute;
+  background: var(--swipe-bg);
+  color: var(--swipe-text);
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--swipe-ring);
+  min-width: 240px;
+  max-width: 320px;
+  overflow: hidden;
+  z-index: 1000;
+  font-size: 12px;
+  line-height: 1.4;
+  display: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Enable flexbox for proper content scrolling */
+  flex-direction: column;
+}
+
+.swipe-control-panel.expanded {
+  display: flex;
+}
+
+.swipe-control-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--swipe-text);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--swipe-border);
+  background: var(--swipe-header-bg);
+  flex-shrink: 0;
+}
+
+.swipe-control-title {
+  flex: 1;
+  font-size: 13px;
+}
+
+.swipe-control-close {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--swipe-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.swipe-control-close:hover {
+  background-color: var(--swipe-hover);
+  color: var(--swipe-text);
+}
+
+.swipe-control-content {
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.swipe-control-group {
+  margin-bottom: 14px;
+}
+
+.swipe-control-group:last-child {
+  margin-bottom: 0;
+}
+
+.swipe-control-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--swipe-label);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.swipe-control-select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 12px;
+  border: 1px solid var(--swipe-input-border);
+  border-radius: 4px;
+  outline: none;
+  background: var(--swipe-input-bg);
+  color: var(--swipe-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.swipe-control-select:hover {
+  border-color: var(--swipe-input-border-hover);
+}
+
+.swipe-control-select:focus {
+  border-color: var(--swipe-accent);
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.15);
+}
+
+.swipe-control-divider {
+  height: 1px;
+  background: var(--swipe-border);
+  margin: 14px 0;
+}
+
+/* ============================================
+   Layer List
+   ============================================ */
+.swipe-layer-list {
+  /* Let each list grow with its layers and rely on the panel's own scroll area
+     (.swipe-control-content) for overflow, so the panel uses the available
+     height instead of stacking two short, separately scrolling boxes. A cap
+     keeps a single very long list from crowding out the other side. */
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--swipe-border);
+  border-radius: 4px;
+  background: var(--swipe-list-bg);
+}
+
+.swipe-layer-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--swipe-border-subtle);
+  transition: background-color 0.1s ease;
+}
+
+.swipe-layer-item:last-child {
+  border-bottom: none;
+}
+
+.swipe-layer-item:hover {
+  background: var(--swipe-item-hover);
+}
+
+.swipe-layer-item input[type='checkbox'] {
+  margin: 0;
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  accent-color: var(--swipe-accent);
+}
+
+.swipe-layer-item label {
+  flex: 1;
+  font-size: 11px;
+  color: var(--swipe-text);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================
+   Scrollbar
+   ============================================ */
+/* Firefox scrollbar */
+.swipe-control-content,
+.swipe-layer-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--swipe-scrollbar) transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) scrollbar */
+.swipe-control-content::-webkit-scrollbar,
+.swipe-layer-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.swipe-control-content::-webkit-scrollbar-track,
+.swipe-layer-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.swipe-control-content::-webkit-scrollbar-thumb,
+.swipe-layer-list::-webkit-scrollbar-thumb {
+  background: var(--swipe-scrollbar);
+  border-radius: 3px;
+}
+
+.swipe-control-content::-webkit-scrollbar-thumb:hover,
+.swipe-layer-list::-webkit-scrollbar-thumb:hover {
+  background: var(--swipe-scrollbar-hover);
+}
+
+/* ============================================
+   Toggle Switch
+   ============================================ */
+.swipe-toggle-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.swipe-toggle-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--swipe-text);
+  cursor: pointer;
+}
+
+.swipe-toggle-slider {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.swipe-toggle-slider input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.swipe-toggle-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--swipe-track);
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.swipe-toggle-track::before {
+  content: '';
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.swipe-toggle-slider input:checked + .swipe-toggle-track {
+  background-color: var(--swipe-accent);
+}
+
+.swipe-toggle-slider input:checked + .swipe-toggle-track::before {
+  transform: translateX(16px);
+}
+
+.swipe-toggle-slider input:focus + .swipe-toggle-track {
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.3);
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+.swipe-layer-list:empty::after {
+  content: 'No layers available';
+  display: block;
+  padding: 12px;
+  color: var(--swipe-muted);
+  font-size: 11px;
+  text-align: center;
+  font-style: italic;
+}
