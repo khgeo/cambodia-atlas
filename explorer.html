@@ -18,6 +18,7 @@
   </div>
 </div>
 <script src="shared/vendor/maplibre-gl.js"></script>
+<script src="shared/vendor/pmtiles.js"></script>
 <script src="shared/atlas.js"></script>
 <script>
 (async () => {
@@ -34,10 +35,11 @@
   for (const p of live) {
     try {
       const { meta, mod, base } = await A.loadPage(p.id);
-      const ids = await mod.addLayers(map, { base, meta, lang: A.lang });
+      const ids = await mod.addLayers(map, { base, meta, lang: A.lang, explorer: true });
+      const initial = ids.map((id) => (map.getLayer(id) && map.getLayoutProperty(id, "visibility")) || "visible");
       const row = document.createElement("label"); row.className = "layer-row";
       row.innerHTML = `<input type="checkbox" id="lyr-${p.id}" checked> <span>${A.t("plate")} ${A.esc(p.no)} · ${A.esc(A.pick(p, "title"))}</span>`;
-      row.querySelector("input").onchange = (e) => ids.forEach((id) => map.getLayer(id) && map.setLayoutProperty(id, "visibility", e.target.checked ? "visible" : "none"));
+      row.querySelector("input").onchange = (e) => ids.forEach((id, i) => map.getLayer(id) && map.setLayoutProperty(id, "visibility", e.target.checked ? initial[i] : "none"));
       box.appendChild(row);
     } catch (e) { console.error(e); }
   }

@@ -319,8 +319,7 @@
         <div class="row-head"><h2>${t("bus_lines")}</h2>
           <span><button type="button" class="chip-btn" id="bus-all">${t("bus_all")}</button> <button type="button" class="chip-btn" id="bus-none">${t("bus_none")}</button></span></div>
         <div class="line-list">${lineRows}</div>
-      </section>
-      <section><h2>${t("bus_sources")}</h2><ul class="src">${(A._meta?.sources || []).map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a></li>`).join("")}</ul></section>`;
+      </section>`;
 
     const facts = () => {
       document.getElementById("bus-speed-v").textContent = `${S.speed} km/h`;

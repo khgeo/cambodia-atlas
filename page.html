@@ -18,6 +18,7 @@
   </div>
 </div>
 <script src="shared/vendor/maplibre-gl.js"></script>
+<script src="shared/vendor/pmtiles.js"></script>
 <script src="shared/atlas.js"></script>
 <script>
 (async () => {
@@ -40,6 +41,7 @@
       <h1>${A.esc(A.pick(meta, "title"))}</h1></div>
       <div class="prose">${prose}</div>
       <div id="page-ui"></div>
+      <div id="page-sources"></div>
       <div class="book-tags">${(meta.books || []).map((b) => `<span class="book-tag">${A.t("books")}: ${A.esc(b)}</span>`).join("")}</div>
       <nav class="plate-nav">
         ${prev ? `<a href="page.html#${prev.id}">← ${A.esc(A.pick(prev, "title"))}</a>` : `<a href="index.html">← ${A.t("back")}</a>`}
@@ -50,6 +52,9 @@
     const ctx = { base, meta, lang: A.lang };
     await mod.addLayers(map, ctx);
     if (mod.mountPanel) await mod.mountPanel(document.getElementById("page-ui"), map, ctx);
+    if (meta.sources && meta.sources.length) document.getElementById("page-sources").innerHTML =
+      `<h2>${A.lang === "km" ? "ប្រភពទិន្នន័យ" : "Sources"}</h2><ul class="src">${meta.sources.map((s) =>
+        `<li><a href="${A.esc(s.url)}" target="_blank" rel="noopener">${A.esc(s.name)}</a></li>`).join("")}</ul>`;
   } catch (e) {
     console.error(e);
     panel.innerHTML = `<p class="note">This plate could not be loaded: ${A.esc(e.message)}</p><p><a href="index.html">← ${A.t("back")}</a></p>`;

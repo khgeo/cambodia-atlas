@@ -14,18 +14,19 @@ Plain HTML + JavaScript, no build step. It runs on GitHub Pages.
 2. Open the repository **Settings → Pages**. Under *Build and deployment*, choose **Deploy from a branch**, branch `main`, folder `/ (root)`.
 3. After a minute the atlas is at `https://khgeo.github.io/cambodia-atlas/`.
 
-To test locally, serve the folder. Opening `index.html` directly from disk does not work, because browsers block `fetch()` of local files.
+To test locally, serve the folder with a server that supports range requests (needed for `.pmtiles`). Opening `index.html` directly from disk does not work.
 
 ```bash
-python3 -m http.server 8000      # then open http://localhost:8000
+npx http-server -p 8000      # then open http://localhost:8000
 ```
 
 ## Plates
 
 | Plate | Status | Folder |
 |---|---|---|
+| 1.2 Provinces, districts, communes and villages | live | `pages/admin-units/` |
 | 4.1 Phnom Penh City Bus | live | `pages/transport-citybus/` |
-| 1.1, 1.2, 2.1, 2.2, 3.1, 4.2 | planned | listed in `pages/catalog.json` |
+| 1.1, 2.1, 2.2, 3.1, 4.2 | planned | listed in `pages/catalog.json` |
 
 ## Add a new plate
 
@@ -48,6 +49,14 @@ Atlas.register("<plate-id>", {
 5. In `pages/catalog.json`, set the plate's `status` to `"live"`.
 
 Large rasters (land cover, flood extents) should be stored as PMTiles or Cloud-Optimized GeoTIFF rather than GeoJSON. Both can be served straight from GitHub Pages or a release asset.
+
+## The admin units plate: data
+
+- **Source:** the 2024 administrative dataset (PB/DB/CB/VC shapefiles, WGS 84 / UTM 48N): 25 provinces, 209 districts, 1,653 communes (plus 49 island parts) and 14,578 village points, with Khmer and English names.
+- **Format:** served at full detail as vector tiles in one file, `pages/admin-units/data/admin.pmtiles` (14 MB; GitHub Pages supports the HTTP range requests PMTiles needs). `index.json` holds names, codes, parents, areas and counts for search and the ranked table. `villages.json` is loaded only when someone searches.
+- **Areas:** computed in UTM 48N, without the Tonle Sap lake.
+- **Population:** province totals from the Cambodia Inter-censal Population Survey 2024 (NIS), as tabulated on Wikipedia's *Provinces of Cambodia*. Check them against the NIS report before you cite them.
+- **Rebuild:** `python3 tools/build_admin_2024.py <folder with PB_2024/ DB_2024/ CB_2024/ VC_2024/> path/to/tippecanoe`. This needs Node.js for mapshaper and [tippecanoe](https://github.com/felt/tippecanoe).
 
 ## The City Bus plate: data and what is estimated
 
@@ -76,6 +85,6 @@ Both assumptions can be changed in the page.
 
 ## Credits
 
-MapLibre GL JS (BSD-3, vendored in `shared/vendor/`). Online base map from OpenFreeMap / OpenMapTiles, © OpenStreetMap contributors. If the base map cannot be reached, the atlas falls back to a plain background with the main rivers. Fonts: Kantumruy Pro, Moul, Barlow Condensed (Google Fonts).
+MapLibre GL JS (BSD-3) and PMTiles (BSD-3), vendored in `shared/vendor/`. Online base map from OpenFreeMap / OpenMapTiles, © OpenStreetMap contributors. If the base map cannot be reached, the atlas falls back to a plain background with the main rivers. Fonts: Kantumruy Pro, Moul, Barlow Condensed (Google Fonts).
 
-Compiled by YAM Sarath, Department of Geography and Land Management, Royal University of Phnom Penh.
+Compiled by YAM Sarath (personal project).

@@ -37,7 +37,7 @@
   document.getElementById("lede").textContent = km
     ? "ផែនទីអន្តរកម្មនៃប្រទេសកម្ពុជា សម្រាប់សិក្សាផែនទីវិទ្យា ប្រព័ន្ធព័ត៌មានភូមិសាស្ត្រ និងទូរសម្បទា។ ផែនទីនីមួយៗភ្ជាប់ទៅនឹងជំពូកក្នុងសៀវភៅសិក្សា។"
     : "Interactive maps of Cambodia for learning cartography, GIS and remote sensing. Each plate pairs a live map with a short reading and links to the matching chapter of the textbook series.";
-  document.getElementById("credit").textContent = km ? "រៀបចំដោយ យាំ សារដ្ឋ · ដេប៉ាតឺម៉ង់ភូមិវិទ្យា សាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ" : "Compiled by YAM Sarath · Department of Geography and Land Management, RUPP";
+  document.getElementById("credit").textContent = km ? "រៀបចំដោយ យាំ សារដ្ឋ" : "Compiled by YAM Sarath";
   try {
     const cat = await A.catalog();
     const all = cat.chapters.flatMap((c) => c.plates);

@@ -1,0 +1,34 @@
+{
+  "id": "admin-units",
+  "plate": "1.2",
+  "chapter_en": "Mapping Cambodia",
+  "chapter_km": "ការធ្វើផែនទីកម្ពុជា",
+  "title_en": "Provinces, districts, communes and villages",
+  "title_km": "ខេត្ត ស្រុក ឃុំ និងភូមិ",
+  "books": [
+    "Cartography",
+    "GIS"
+  ],
+  "center": [
+    104.9,
+    12.55
+  ],
+  "zoom": 6.2,
+  "text_en": "text.en.html",
+  "text_km": "text.km.html",
+  "data": {
+    "tiles": "data/admin.pmtiles",
+    "index": "data/index.json",
+    "villages": "data/villages.json"
+  },
+  "sources": [
+    {
+      "name": "Administrative boundaries 2024: provinces, districts, communes and village points (compiled by YAM Sarath)",
+      "url": "https://github.com/khgeo/cambodia-atlas"
+    },
+    {
+      "name": "Population: Cambodia Inter-censal Population Survey 2024, National Institute of Statistics",
+      "url": "https://cambodia.unfpa.org/en/publications/cambodia-inter-censal-population-survey-2024-final-report"
+    }
+  ]
+}

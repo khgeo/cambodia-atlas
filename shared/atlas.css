@@ -96,6 +96,7 @@ a.plate:hover { border-color: var(--accent); box-shadow: var(--shadow); }
 [lang="km"] .panel h2 { font: 600 14px/1.6 var(--f-body); letter-spacing: 0; text-transform: none; }
 .prose p { margin: 0 0 .7em; max-width: 65ch; }
 .prose p:last-child { margin-bottom: 0; }
+.src { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; padding-left: 1em; margin: 6px 0 0; }
 .note { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 10px 12px; font-size: 13.5px; border-radius: 0 4px 4px 0; }
 .mapwrap { position: relative; min-width: 0; min-height: 0; background: var(--map-bg); }
 .map { position: absolute; inset: 0; }

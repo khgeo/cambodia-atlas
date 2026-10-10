@@ -112,6 +112,13 @@
     return map;
   };
 
+  /** Registers the pmtiles:// protocol once and returns the tile URL for a .pmtiles file next to the page. */
+  let pmReady = false;
+  Atlas.pmtilesUrl = (path) => {
+    if (!pmReady) { const p = new pmtiles.Protocol(); maplibregl.addProtocol("pmtiles", p.tile); pmReady = true; }
+    return "pmtiles://" + new URL(path, location.href).href;
+  };
+
   /** Adds an HTML label (used for Khmer text, which MapLibre glyph rendering cannot shape). */
   Atlas.htmlLabel = (map, lngLat, text, anchor = "left") => {
     const el = document.createElement("div"); el.className = "map-label"; el.textContent = text;
