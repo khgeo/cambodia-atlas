@@ -107,8 +107,30 @@ a.plate:hover { border-color: var(--accent); box-shadow: var(--shadow); }
 .map { position: absolute; inset: 0; }
 .plate-nav { display: flex; gap: 8px; justify-content: space-between; border-top: 1px solid var(--rule); padding-top: 14px; font-size: 13px; }
 .plate-nav a { text-decoration: none; }
-.basemap-note { position: absolute; left: 10px; bottom: 10px; z-index: 2; background: var(--surface); border: 1px solid var(--rule);
+.basemap-note { position: absolute; left: 50%; transform: translateX(-50%); top: 10px; text-align: center; z-index: 2; background: var(--surface); border: 1px solid var(--rule);
   font-size: 12px; padding: 4px 8px; border-radius: 4px; color: var(--muted); max-width: calc(100% - 20px); }
+
+/* legend (built from layer styling, see Atlas.legend) */
+.atlas-legend { background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; box-shadow: var(--shadow);
+  max-width: min(280px, calc(100vw - 40px)); max-height: 55vh; overflow: auto; font: 12.5px/1.4 var(--f-body); }
+.atlas-legend .lg-toggle { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  width: 100%; padding: 7px 10px; font: 600 12px/1 var(--f-data); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.atlas-legend .lg-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.atlas-legend .lg-toggle[aria-expanded="false"] .lg-chev { transform: rotate(-90deg); }
+.atlas-legend .lg-body { display: grid; gap: 10px; padding: 0 10px 10px; }
+.atlas-legend .lg-body[hidden] { display: none; }
+.lg-title { font-weight: 600; margin-bottom: 4px; }
+.lg-unit { font-weight: 400; color: var(--muted); }
+.lg-items { display: grid; gap: 3px; }
+.lg-items.lg-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 10px; }
+.lg-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.lg-row > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-sw { flex: none; display: inline-block; }
+.lg-fill { width: 20px; height: 12px; border-radius: 2px; background: var(--c); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 15%, transparent); }
+.lg-line { width: 20px; height: 4px; border-radius: 2px; background: var(--c); }
+.lg-circle { width: 10px; height: 10px; margin-inline: 5px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1.5px var(--s); }
+.lg-ramp { height: 10px; border-radius: 2px; }
+.lg-ramp-lab { display: flex; justify-content: space-between; color: var(--muted); font-size: 11.5px; }
 
 /* MapLibre controls follow the theme */
 .maplibregl-ctrl-group { background: var(--surface) !important; }

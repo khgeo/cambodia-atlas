@@ -50,7 +50,20 @@ Atlas.register("<plate-id>", {
 });
 ```
 
-5. In `pages/catalog.json`, set the plate's `status` to `"live"`.
+5. Register the layers that belong in the legend. The atlas reads each layer's live colour rules and draws the legend itself: `step` becomes classes, `match` becomes categories, `interpolate` becomes a colour ramp, and a plain colour becomes one entry. It updates automatically when the plate changes a colour with `setPaintProperty`.
+
+```js
+Atlas.legend(map, "my-layer", {
+  title: { en: "Population density", km: "ដង់ស៊ីតេប្រជាជន" },  // or a function, for titles that change
+  unit: "people/km²",
+  labels: { "1A": { en: "Line 1A", km: "ខ្សែ 1A" } },        // optional names for match categories
+  visible: () => true,                                          // optional; default follows layer visibility
+  order: 1,
+});
+```
+
+6. In `pages/catalog.json`, set the plate's `status` to `"live"`.
+7. Run `python3 tools/bump_version.py` before uploading, so browsers fetch the new files instead of cached ones.
 
 Large rasters (land cover, flood extents) should be stored as PMTiles or Cloud-Optimized GeoTIFF rather than GeoJSON. Both can be served straight from GitHub Pages or a release asset.
 
