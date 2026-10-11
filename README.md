@@ -26,6 +26,7 @@ npx http-server -p 8000      # then open http://localhost:8000
 |---|---|---|
 | 1.2 Provinces, districts, communes and villages | live | `pages/admin-units/` |
 | 4.1 Phnom Penh City Bus | live | `pages/transport-citybus/` |
+| 5.1 Population and heavier-rainfall scenarios | live prototype | `pages/population-rainfall/` |
 | 1.1, 2.1, 2.2, 3.1, 4.2 | planned | listed in `pages/catalog.json` |
 
 ## Open in GeoLibre
@@ -110,3 +111,12 @@ Both assumptions can be changed in the page.
 MapLibre GL JS 6 (BSD-3), PMTiles 4 (BSD-3) and maplibre-gl-swipe (MIT, opengeos), vendored in `shared/vendor/`. Rebuild them with `bash tools/vendor/build.sh`. MapLibre 6 ships only as ES modules, so the pages load `shared/vendor/libs.mjs` as a module, and it sets the `maplibregl`, `pmtiles` and `MaplibreSwipe` globals the plates use. Online base map from OpenFreeMap / OpenMapTiles, © OpenStreetMap contributors. If the base map cannot be reached, the atlas falls back to a plain background with the main rivers. Fonts: Kantumruy Pro, Moul, Barlow Condensed (Google Fonts).
 
 Compiled by YAM Sarath (personal project).
+
+
+## Plate 5.1: Population and heavier-rainfall scenarios
+
+This plate adds a satellite imagery toggle, a source-linked 2020 WorldPop population layer (tiles must first be built locally), location inspection, and a clearly labelled hypothetical rainfall/runoff calculator. The initial calculator uses the SCS Curve Number equation with generic teaching assumptions; it is not calibrated to a Cambodian catchment and does not produce flood extent, water depth, velocity, or exposed-population estimates.
+
+To enable the population display, download the Cambodia 2020 1 km aggregated GeoTIFF from [WorldPop](https://hub.worldpop.org/geodata/summary?id=30532), then run `python3 tools/build_population_tiles.py /path/to/khm_ppp_2020_1km_Aggregated.tif`. This requires GDAL command-line tools. Follow `pages/population-rainfall/data/README.md` to enable the tiles. WorldPop population values are modelled estimates per grid cell, not direct counts at every cell.
+
+The next modelling milestone is a validated catchment-scale runoff/flood workflow with rainfall time series, terrain conditioning, drainage and river boundary conditions, calibration, and explicit uncertainty. Do not describe the current prototype as a flood forecast or population-at-risk map.

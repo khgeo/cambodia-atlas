@@ -116,6 +116,27 @@
           "summary_km": "ថ្នាក់គម្របដីប្រាំមួយ ជាមួយការប្រៀបធៀបនឹងផែនទីចាស់។"
         }
       ]
+    },
+    {
+      "no": 5,
+      "title_en": "People and hazards",
+      "title_km": "ប្រជាជន និងគ្រោះមហន្តរាយ",
+      "plates": [
+        {
+          "no": "5.1",
+          "id": "population-rainfall",
+          "status": "live",
+          "books": [
+            "GIS",
+            "Remote Sensing",
+            "Applied GIS & RS"
+          ],
+          "title_en": "Population and heavier-rainfall scenarios",
+          "title_km": "ប្រជាជន និងសេណារីយ៉ូភ្លៀងធ្លាក់ខ្លាំង",
+          "summary_en": "Explore 2020 population estimates and calculate an explicitly hypothetical rainfall-runoff scenario; flood mapping is not yet connected.",
+          "summary_km": "ស្វែងយល់ពីការប៉ាន់ស្មានប្រជាជនឆ្នាំ២០២០ និងគណនាសេណារីយ៉ូទឹកហូរលើផ្ទៃដោយបញ្ជាក់ថាជាសម្មតិកម្ម។ មិនទាន់ភ្ជាប់គំរូផែនទីទឹកជំនន់ទេ។"
+        }
+      ]
     }
   ]
 }
