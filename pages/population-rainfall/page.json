@@ -1,40 +1,20 @@
 {
   "id": "population-rainfall",
   "plate": "5.1",
-  "chapter_en": "People and hazards",
-  "chapter_km": "ប្រជាជន និងគ្រោះមហន្តរាយ",
-  "title_en": "Population and heavier-rainfall scenarios",
+  "chapter_en": "People and risk",
+  "chapter_km": "ប្រជាជន និងហានិភ័យ",
+  "title_en": "Population & heavier-rainfall scenarios",
   "title_km": "ប្រជាជន និងសេណារីយ៉ូភ្លៀងធ្លាក់ខ្លាំង",
   "books": ["GIS", "Remote Sensing", "Applied GIS & RS"],
-  "center": [104.92, 12.25],
-  "zoom": 6.1,
+  "center": [104.9, 12.55],
+  "zoom": 5.7,
   "text_en": "text.en.html",
   "text_km": "text.km.html",
-  "data": {
-    "populationTiles": "data/population-tiles/{z}/{x}/{y}.png",
-    "populationTilesAvailable": false
-  },
+  "data": { "populationTiles": "data/population/{z}/{x}/{y}.png" },
   "sources": [
-    {
-      "name": "WorldPop Cambodia 2020 population counts (1 km; estimated people per cell; CC BY 4.0)",
-      "url": "https://hub.worldpop.org/geodata/summary?id=30532"
-    },
-    {
-      "name": "WorldPop Global 2 population data and product guidance",
-      "url": "https://www.worldpop.org/datacatalog/"
-    },
-    {
-      "name": "Esri World Imagery (imagery service terms apply)",
-      "url": "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9"
-    },
-    {
-      "name": "OpenStreetMap contributors",
-      "url": "https://www.openstreetmap.org/copyright"
-    }
-  ],
-  "scenario": {
-    "modelStatus": "illustrative-runoff-only",
-    "populationYear": 2020,
-    "note": "The initial release calculates a simplified, explicitly illustrative runoff-depth estimate using the SCS Curve Number equation. It does not calculate flood extent, depth, velocity, or population exposure."
-  }
+    { "name": "WorldPop — gridded population estimates and download portal", "url": "https://hub.worldpop.org/" },
+    { "name": "CHIRPS rainfall data — Climate Hazards Center", "url": "https://www.chc.ucsb.edu/data/chirps" },
+    { "name": "Copernicus DEM — global elevation data", "url": "https://dataspace.copernicus.eu/" },
+    { "name": "OpenStreetMap contributors — geographic context", "url": "https://www.openstreetmap.org/copyright" }
+  ]
 }

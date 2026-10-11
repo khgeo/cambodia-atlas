@@ -248,24 +248,17 @@
     }
     map.addLayer({ id: "bus-line-casing", type: "line", source: "bus-lines", layout: { "line-join": "round", "line-cap": "round" },
       paint: { "line-color": halo, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 4, 15, 10], "line-offset": ["get", "offset"] } });
-    const colorExpr = ["match", ["get", "line"], ...lines.features.flatMap((f) => [f.properties.line, f.properties.color]), "#888"];
     map.addLayer({ id: "bus-line", type: "line", source: "bus-lines", layout: { "line-join": "round", "line-cap": "round" },
-      paint: { "line-color": colorExpr, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 2, 15, 6], "line-offset": ["get", "offset"] } });
+      paint: { "line-color": ["get", "color"], "line-width": ["interpolate", ["linear"], ["zoom"], 10, 2, 15, 6], "line-offset": ["get", "offset"] } });
     map.addLayer({ id: "bus-line-hi", type: "line", source: "bus-lines", filter: ["==", ["get", "line"], ""], layout: { "line-join": "round", "line-cap": "round" },
       paint: { "line-color": ["get", "color"], "line-width": ["interpolate", ["linear"], ["zoom"], 10, 6, 15, 12], "line-offset": ["get", "offset"], "line-opacity": 0.9 } });
+    const colorExpr = ["match", ["get", "line"], ...lines.features.flatMap((f) => [f.properties.line, f.properties.color]), "#888"];
     map.addLayer({ id: "bus-stop", type: "circle", source: "bus-stops", minzoom: 11.5,
       paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 11.5, 1.8, 15, 5.5], "circle-color": halo,
                "circle-stroke-color": colorExpr, "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 11.5, 1, 15, 2.5] } });
     map.addLayer({ id: "bus-bus", type: "circle", source: "buses",
       paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 3.5, 15, 8], "circle-color": ["get", "color"],
                "circle-stroke-color": A.cssVar("--ink") || "#14304a", "circle-stroke-width": 1.5 } });
-
-    // legend, built by the atlas from these layers' live styling
-    const lineLabels = Object.fromEntries(lines.features.map((f) => [f.properties.line, { en: `Line ${f.properties.line}`, km: `ខ្សែ ${f.properties.line}` }]));
-    A.legend(map, "bus-line", { order: 1, title: { en: "City Bus lines (2020)", km: "ខ្សែរថយន្តក្រុង (២០២០)" }, labels: lineLabels });
-    A.legend(map, "bus-bus", { order: 2, ignoreZoom: true, items: [{ color: A.cssVar("--muted") || "#888", stroke: A.cssVar("--ink"), label: { en: "Bus (estimated position)", km: "រថយន្ត (ទីតាំងប៉ាន់ស្មាន)" } }] });
-    A.legend(map, "bus-stop", { order: 3, ignoreZoom: true, items: [{ color: halo, stroke: A.cssVar("--ink"), label: { en: "Bus stop (approximate)", km: "ចំណត (ប៉ាន់ស្មាន)" } }] });
-    if (map.getLayer("bus-roads")) A.legend(map, "bus-roads", { order: 4, title: { en: "Roads (MPWT 2014)", km: "ផ្លូវ (ក្រសួងសាធារណការ ២០១៤)" }, shape: "line" });
 
     map.on("click", "bus-stop", (e) => {
       const f = e.features[0]; const l = S.model.byId[f.properties.line];

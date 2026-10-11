@@ -119,8 +119,8 @@
     },
     {
       "no": 5,
-      "title_en": "People and hazards",
-      "title_km": "ប្រជាជន និងគ្រោះមហន្តរាយ",
+      "title_en": "People, climate and risk",
+      "title_km": "ប្រជាជន អាកាសធាតុ និងហានិភ័យ",
       "plates": [
         {
           "no": "5.1",
@@ -131,10 +131,10 @@
             "Remote Sensing",
             "Applied GIS & RS"
           ],
-          "title_en": "Population and heavier-rainfall scenarios",
+          "title_en": "Population & heavier-rainfall scenarios",
           "title_km": "ប្រជាជន និងសេណារីយ៉ូភ្លៀងធ្លាក់ខ្លាំង",
-          "summary_en": "Explore 2020 population estimates and calculate an explicitly hypothetical rainfall-runoff scenario; flood mapping is not yet connected.",
-          "summary_km": "ស្វែងយល់ពីការប៉ាន់ស្មានប្រជាជនឆ្នាំ២០២០ និងគណនាសេណារីយ៉ូទឹកហូរលើផ្ទៃដោយបញ្ជាក់ថាជាសម្មតិកម្ម។ មិនទាន់ភ្ជាប់គំរូផែនទីទឹកជំនន់ទេ។"
+          "summary_en": "Explore the 2020 population baseline and test a clearly labelled hypothetical rainfall-runoff scenario.",
+          "summary_km": "ស្វែងយល់ពីទិន្នន័យប្រជាជនឆ្នាំ២០២០ និងសាកល្បងសេណារីយ៉ូទឹកហូរពីភ្លៀងដែលបានសន្មត។"
         }
       ]
     }

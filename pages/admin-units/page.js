@@ -58,6 +58,10 @@
     const b = BREAKS[level][metric], r = ramp();
     return ["step", ["coalesce", ["get", metric], -1], A.cssVar("--map-bg"), 0, r[0], b[0], r[1], b[1], r[2], b[2], r[3], b[3], r[4], b[4], r[5]];
   }
+  function classLabels(level, metric) {
+    const b = BREAKS[level][metric];
+    return [`< ${nf(b[0])}`, ...b.slice(0, -1).map((x, i) => `${nf(x)} – ${nf(b[i + 1])}`), `≥ ${nf(b[b.length - 1])}`];
+  }
 
   async function addLayers(map, ctx) {
     S.map = map; S.ctx = ctx;
@@ -128,15 +132,6 @@
       if (f) select(S.level, f.properties.code, false);
     });
 
-    // legend, built by the atlas from these layers' live styling
-    for (const lvl of LEVELS) A.legend(map, `adm-fill-${lvl}`, { order: 1, hideNoData: true,
-      title: () => t(MLABEL[S.level === lvl ? S.metric : "area_km2"]), unit: () => { const m = S.level === lvl ? S.metric : "area_km2"; return m === "pop2024" ? "" : t(UNIT[m]); },
-      visible: () => S.level === lvl });
-    A.legend(map, "adm-lake", { order: 5, title: { en: "Tonle Sap lake", km: "បឹងទន្លេសាប" } });
-    A.legend(map, "adm-prov-outline", { order: 6, title: { en: "Province boundary", km: "ព្រំប្រទល់ខេត្ត" } });
-    A.legend(map, "adm-dist-outline", { order: 7, title: { en: "District boundary", km: "ព្រំប្រទល់ស្រុក" }, visible: () => S.level === "commune" });
-    A.legend(map, "adm-villages", { order: 8, title: { en: "Village", km: "ភូមិ" } });
-
     // HTML labels (Khmer shapes correctly in HTML): provinces at z≥6.6, districts at z≥8.6
     for (const r of S.index) {
       if (!r.label || (r.lvl !== "province" && r.lvl !== "district")) continue;
@@ -202,7 +197,7 @@
     }
     map.setLayoutProperty("adm-dist-outline", "visibility", lvl === "commune" ? "visible" : "none");
     map.setPaintProperty(`adm-fill-${lvl}`, "fill-color", fillExpr(lvl, S.metric));
-    S.toggleLabels(); renderControls(); A.refreshLegend(map);
+    S.toggleLabels(); renderControls();
     if (S.compare) startCompare();
   }
 
@@ -262,6 +257,10 @@
     lv.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.level === S.level));
     document.getElementById("adm-metric").innerHTML =
       METRICS[S.level].map((m) => `<option value="${m}" ${m === S.metric ? "selected" : ""}>${t(MLABEL[m])}</option>`).join("");
+    const r = ramp();
+    document.getElementById("adm-legend").innerHTML =
+      `<div class="muted adm-unit">${t(MLABEL[S.metric])} (${t(UNIT[S.metric])})</div>` +
+      classLabels(S.level, S.metric).map((lab, i) => `<div class="adm-key"><span class="adm-sw" style="background:${r[i]}"></span><span class="num">${lab}</span></div>`).join("");
     const m = S.level === "province" ? S.metric : "density";
     const rows = S.index.filter((x) => x.lvl === "province").sort((a, b) => (b[m] ?? -1) - (a[m] ?? -1));
     const tb = document.getElementById("adm-table");
@@ -303,6 +302,8 @@
     st.textContent = `
       .adm-seg{display:flex;gap:4px;flex-wrap:wrap}.adm-ctrl{display:grid;gap:6px}.adm-ctrl>label{font-size:13px;color:var(--muted)}
       .adm-ctrl select,.adm-ctrl input{width:100%;padding:7px 9px;border:1px solid var(--rule);border-radius:4px;background:var(--surface)}
+      .adm-legend{display:grid;gap:3px;font-size:13px}.adm-key{display:flex;align-items:center;gap:8px}
+      .adm-sw{width:22px;height:12px;border-radius:2px;border:1px solid var(--rule)}.adm-unit{font-size:12px;margin-bottom:2px}
       .adm-card{padding:14px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);display:grid;gap:4px}
       .adm-name{font-size:20px;font-weight:600;line-height:1.35}.adm-name .muted{font-size:14px;font-weight:400}.adm-chain{font-size:13px;color:var(--muted)}
       .adm-dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:6px 0 0;font-size:13.5px}.adm-dl dt{color:var(--muted)}.adm-dl dd{margin:0;text-align:right}
@@ -339,11 +340,12 @@
       ${S.map.getSource("adm14") ? `<section class="adm-ctrl">
         <button type="button" class="chip-btn adm-compare-btn" id="adm-compare" aria-pressed="false">⇆ ${t("adm_compare")}</button>
         <p class="adm-compare-note" id="adm-compare-note" hidden>${t("adm_compare_note")}<br><span class="num">${t("adm_2014_counts")}</span></p></section>` : ""}
-      <section class="adm-ctrl"><label for="adm-metric">${t("adm_colour")}</label><select id="adm-metric"></select></section>
+      <section class="adm-ctrl"><label for="adm-metric">${t("adm_colour")}</label><select id="adm-metric"></select>
+        <div class="adm-legend" id="adm-legend"></div></section>
       <section class="adm-ctrl"><h2>${t("adm_table")}</h2><div class="adm-table" id="adm-table"></div></section>`;
     document.getElementById("adm-levels").querySelectorAll("button").forEach((b) => (b.onclick = () => setLevel(b.dataset.level)));
     const cmp = document.getElementById("adm-compare"); if (cmp) cmp.onclick = () => setCompare(!S.compare);
-    document.getElementById("adm-metric").onchange = (e) => { if (S.compare && e.target.value !== "area_km2") setCompare(false); S.metric = e.target.value; S.map.setPaintProperty(`adm-fill-${S.level}`, "fill-color", fillExpr(S.level, S.metric)); renderControls(); A.refreshLegend(S.map); };
+    document.getElementById("adm-metric").onchange = (e) => { if (S.compare && e.target.value !== "area_km2") setCompare(false); S.metric = e.target.value; S.map.setPaintProperty(`adm-fill-${S.level}`, "fill-color", fillExpr(S.level, S.metric)); renderControls(); };
     const input = document.getElementById("adm-search"), box = document.getElementById("adm-results");
     let seq = 0, results = [];
     input.oninput = async () => {

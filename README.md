@@ -1,122 +1,80 @@
 # Interactive Cambodia Atlas · អាត្លាសអន្តរកម្មកម្ពុជា
 
-A collection of interactive maps ("plates") of Cambodia for the Cartography, GIS, Remote Sensing and Applied GIS & RS textbook series. Each plate has a live map, a short reading in Khmer and English, and links to the matching book chapter.
+A bilingual, no-build-step geospatial atlas for Cambodia. Each atlas plate combines an interactive map, a short reading in Khmer and English, data-source notes, and optional analysis or simulation controls.
 
-Plain HTML + JavaScript, no build step. It runs on GitHub Pages.
+**Design direction:** Explore · Analyze · Simulate. The atlas is built for cartography, GIS, remote sensing, geography education and transparent scenario exploration.
 
-- `index.html`: cover and plate index (read from `pages/catalog.json`)
-- `page.html#<plate-id>`: one plate, with the reading beside the map
-- `explorer.html`: every plate's layers together on one map
+## Run locally
+
+Serve the repository root with a static HTTP server. Opening `index.html` directly as a `file://` URL does not work because browser modules, JSON fetches and PMTiles range requests require HTTP.
+
+```bash
+python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+For PMTiles, use a server that supports HTTP Range requests. GitHub Pages supports the range requests needed by the administrative-boundary archive.
 
 ## Publish on GitHub Pages
 
-1. Create a repository, for example `khgeo/cambodia-atlas`, and push this folder to it.
-2. Open the repository **Settings → Pages**. Under *Build and deployment*, choose **Deploy from a branch**, branch `main`, folder `/ (root)`.
-3. After a minute the atlas is at `https://khgeo.github.io/cambodia-atlas/`.
+1. Commit and push the repository to the `main` branch.
+2. In GitHub, open **Settings → Pages**.
+3. Choose **Deploy from a branch**, branch `main`, folder `/ (root)`.
+4. The site should publish at `https://khgeo.github.io/cambodia-atlas/`.
+5. After changing code or styles, run `python3 tools/bump_version.py`, commit, and push.
 
-To test locally, serve the folder with a server that supports range requests (needed for `.pmtiles`). Opening `index.html` directly from disk does not work.
+## Live plates
+
+| Plate | Module | Notes |
+|---|---|---|
+| 1.2 | Administrative units | 2024 boundaries, searchable village points and 2014 ↔ 2024 swipe comparison |
+| 4.1 | Phnom Penh City Bus | Animated bus movement; stop positions and timetable values include documented approximations |
+| 5.1 | Population & heavier-rainfall scenarios | Satellite imagery, 2020 population overlay when tiles are installed, and a teaching-level runoff calculator |
+
+Plates 1.1, 2.1, 2.2, 3.1 and 4.2 remain planned and are listed in `pages/catalog.json`.
+
+## Administrative data and the recovered 2014 file
+
+The administrative-unit plate uses:
+
+- `pages/admin-units/data/admin.pmtiles` — 2024 administrative boundaries and village points.
+- `pages/admin-units/data/admin2014.pmtiles` — 2014 district and commune boundaries used by the swipe comparison.
+- `pages/admin-units/data/index.json` — names, codes, parent units, areas and counts for search and ranking.
+- `pages/admin-units/data/villages.json` — bilingual village search index.
+
+The 2014 PMTiles file is included in this project archive. The admin page metadata references it as `tiles2014`, and the compare control uses the `adm14` vector source. The comparison source is Open Development Cambodia via geoBoundaries (CC BY 4.0); consult the original metadata and source terms before redistribution or derivative publication.
+
+Rebuild scripts:
 
 ```bash
-npx http-server -p 8000      # then open http://localhost:8000
+python3 tools/build_admin_2014.py <source-folder> <path-to-tippecanoe>
+python3 tools/build_admin_2024.py <folder-with-PB_2024-DB_2024-CB_2024-VC_2024> <path-to-tippecanoe>
 ```
 
-## Plates
+The rebuild scripts require their documented source files and tools; they are not required just to display the bundled PMTiles files.
 
-| Plate | Status | Folder |
-|---|---|---|
-| 1.2 Provinces, districts, communes and villages | live | `pages/admin-units/` |
-| 4.1 Phnom Penh City Bus | live | `pages/transport-citybus/` |
-| 5.1 Population and heavier-rainfall scenarios | live prototype | `pages/population-rainfall/` |
-| 1.1, 2.1, 2.2, 3.1, 4.2 | planned | listed in `pages/catalog.json` |
+## Plate 5.1 — population and rainfall scenario
 
-## Open in GeoLibre
+The panel separates three types of information:
 
-Each plate can list data files under `"geolibre"` in its `page.json`. The plate then shows an **Open the data in GeoLibre** button, which opens those files in [GeoLibre](https://web.geolibre.app/) (free, MIT, browser-based GIS from opengeos) for analysis. The link uses GeoLibre's `data=` parameter. It works once the atlas is on GitHub Pages; GeoLibre cannot read files from a local test server.
+- **Baseline estimate:** WorldPop gridded population estimates for reference year 2020. Values are modelled estimates, not direct counts in every cell.
+- **Derived result:** the runoff depth calculated from user-selected inputs with the SCS Curve Number equation.
+- **Hypothetical scenario:** the rainfall total and duration chosen by the user. It is not an observed storm or forecast.
 
-## Add a new plate
+The population raster tiles are **not bundled**. This avoids redistributing an external dataset without checking its product metadata and license. Follow `pages/population-rainfall/data/README.md` to download, inspect, style and tile the selected WorldPop product. Until the tile pyramid exists, the population overlay remains disabled and the panel displays a notice.
 
-1. Make a folder `pages/<plate-id>/` (lowercase letters, numbers and hyphens).
-2. Add `page.json`. Copy the bus plate's file and change the title, plate number, centre/zoom and text files.
-3. Add `text.en.html` and `text.km.html`. These are short HTML fragments (paragraphs only).
-4. Add `page.js` that registers the plate:
+The current runoff calculator uses a generic Curve Number as a teaching assumption. It is **not calibrated to a Cambodian catchment** and does not calculate flood extent, water depth, velocity, flood probability, or exposed-population counts. Do not use it for emergency warnings or operational planning. A later flood module should use spatially varying rainfall, suitable terrain conditioning, soil/land-cover parameters, drainage and river boundary conditions, independent validation, and explicit uncertainty.
 
-```js
-Atlas.register("<plate-id>", {
-  async addLayers(map, ctx) {           // ctx.base = "pages/<plate-id>/", ctx.meta = page.json
-    map.addSource("my-src", { type: "geojson", data: ctx.base + "data/my.geojson" });
-    map.addLayer({ id: "my-layer", type: "fill", source: "my-src", paint: { "fill-color": "#3a7fc4" } });
-    return ["my-layer"];                // layer ids, used by the Explorer
-  },
-  mountPanel(el, map, ctx) { /* optional controls under the reading */ },
-});
-```
+## Architecture
 
-5. Register the layers that belong in the legend. The atlas reads each layer's live colour rules and draws the legend itself: `step` becomes classes, `match` becomes categories, `interpolate` becomes a colour ramp, and a plain colour becomes one entry. It updates automatically when the plate changes a colour with `setPaintProperty`.
-
-```js
-Atlas.legend(map, "my-layer", {
-  title: { en: "Population density", km: "ដង់ស៊ីតេប្រជាជន" },  // or a function, for titles that change
-  unit: "people/km²",
-  labels: { "1A": { en: "Line 1A", km: "ខ្សែ 1A" } },        // optional names for match categories
-  visible: () => true,                                          // optional; default follows layer visibility
-  order: 1,
-});
-```
-
-6. In `pages/catalog.json`, set the plate's `status` to `"live"`.
-7. Run `python3 tools/bump_version.py` before uploading, so browsers fetch the new files instead of cached ones.
-
-Large rasters (land cover, flood extents) should be stored as PMTiles or Cloud-Optimized GeoTIFF rather than GeoJSON. Both can be served straight from GitHub Pages or a release asset.
-
-## The admin units plate: data
-
-- **Source:** the 2024 administrative dataset (PB/DB/CB/VC shapefiles, WGS 84 / UTM 48N): 25 provinces, 209 districts, 1,653 communes (plus 49 island parts) and 14,578 village points, with Khmer and English names.
-- **Format:** served at full detail as vector tiles in one file, `pages/admin-units/data/admin.pmtiles` (14 MB; GitHub Pages supports the HTTP range requests PMTiles needs). `index.json` holds names, codes, parents, areas and counts for search and the ranked table. `villages.json` is loaded only when someone searches.
-- **Areas:** computed in UTM 48N, without the Tonle Sap lake.
-- **Population:** province totals from the Cambodia Inter-censal Population Survey 2024 (NIS), as tabulated on Wikipedia's *Provinces of Cambodia*. Check them against the NIS report before you cite them.
-- **2014 ↔ 2024 swipe:** `admin2014.pmtiles` holds the 2014 districts and communes from Open Development Cambodia (via geoBoundaries, CC BY 4.0), with provinces made by merging districts. Rebuild it with `python3 tools/build_admin_2014.py <folder> path/to/tippecanoe`.
-- **Rebuild:** `python3 tools/build_admin_2024.py <folder with PB_2024/ DB_2024/ CB_2024/ VC_2024/> path/to/tippecanoe`. This needs Node.js for mapshaper and [tippecanoe](https://github.com/felt/tippecanoe).
-
-## The City Bus plate: data and what is estimated
-
-**Taken from the 2020 City Bus brochure** (Phnom Penh Capital Hall / JICA):
-- 17 line variants and the order and names of their 434 stops
-- route colours and the roads each route uses
-- operating hours: first bus 05:30, last arrival 20:30
-- headways: every 10–15 min (1A, 2, 3, 4B), 15–20 min (5B, 6, 9) and 20–30 min (others)
-
-**Routed on real roads:**
-- Each line follows the MPWT 2014 road network (`Kh_All_Roads_MPWT2014`) through anchor points on the roads named in the brochure. The cheapest path between anchors prefers national, provincial and city roads over tracks.
-- Line 6's return along Win Win Blvd is newer than the 2014 roads, so that part is a straight segment. It is listed in the line's `gaps` field.
-- To re-route after moving anchors in `tools/route_citybus_on_roads.py`, run `python3 tools/route_citybus_on_roads.py pp_roads.geojson`. The script header shows how to make `pp_roads.geojson`.
-
-**Still approximate:**
-- Stops are in brochure order but spaced evenly along each route. Every stop is tagged `position_quality: "approximate"`.
-
-**Estimated:**
-- Times at each stop = distance along the line ÷ average speed (default 16 km/h), plus a stop of 20 s at each bus stop.
-- Buses leave both terminals at the midpoint of the headway range.
-
-Both assumptions can be changed in the page.
-
-### Improve the bus data
-
-- **From OpenStreetMap:** `python3 tools/build_citybus_osm.py --dry-run` shows which lines OSM has. Run it without `--dry-run` to replace those lines with OSM geometry and stops. It keeps a `.bak` copy of the old files.
-- **From Open Development Cambodia:** the *Public transportation* dataset and the *Maps of 13 Phnom Penh city bus routes* (874 stops, 2018) can be loaded in QGIS, matched to the stop names, and exported to `data/stops.geojson` with the same fields.
-- **Real timetables:** if City Bus GPS logs or a GTFS feed become available, convert them to the same per-line schedule. Then the "Estimated" label can come off.
-- To regenerate the approximate data: `python3 tools/make_approx_citybus.py`.
+- Plain HTML, CSS and JavaScript; no bundler or build step.
+- MapLibre GL JS and PMTiles are vendored under `shared/vendor/` with their license files.
+- `shared/atlas.js` provides bilingual labels, page loading, basemap setup, PMTiles helpers and cache versioning.
+- `pages/catalog.json` controls the plate index and the live/planned state.
+- Each `pages/<plate-id>/` folder contains its metadata, reading fragments and page module.
 
 ## Credits
 
-MapLibre GL JS 6 (BSD-3), PMTiles 4 (BSD-3) and maplibre-gl-swipe (MIT, opengeos), vendored in `shared/vendor/`. Rebuild them with `bash tools/vendor/build.sh`. MapLibre 6 ships only as ES modules, so the pages load `shared/vendor/libs.mjs` as a module, and it sets the `maplibregl`, `pmtiles` and `MaplibreSwipe` globals the plates use. Online base map from OpenFreeMap / OpenMapTiles, © OpenStreetMap contributors. If the base map cannot be reached, the atlas falls back to a plain background with the main rivers. Fonts: Kantumruy Pro, Moul, Barlow Condensed (Google Fonts).
+MapLibre GL JS (BSD-3), PMTiles (BSD-3), maplibre-gl-swipe (MIT), OpenFreeMap/OpenMapTiles and OpenStreetMap contributors. Satellite imagery is supplied by Esri and its imagery partners when that optional basemap is enabled. Data providers and licensing are listed in the relevant plate metadata and documentation.
 
 Compiled by YAM Sarath (personal project).
-
-
-## Plate 5.1: Population and heavier-rainfall scenarios
-
-This plate adds a satellite imagery toggle, a source-linked 2020 WorldPop population layer (tiles must first be built locally), location inspection, and a clearly labelled hypothetical rainfall/runoff calculator. The initial calculator uses the SCS Curve Number equation with generic teaching assumptions; it is not calibrated to a Cambodian catchment and does not produce flood extent, water depth, velocity, or exposed-population estimates.
-
-To enable the population display, download the Cambodia 2020 1 km aggregated GeoTIFF from [WorldPop](https://hub.worldpop.org/geodata/summary?id=30532), then run `python3 tools/build_population_tiles.py /path/to/khm_ppp_2020_1km_Aggregated.tif`. This requires GDAL command-line tools. Follow `pages/population-rainfall/data/README.md` to enable the tiles. WorldPop population values are modelled estimates per grid cell, not direct counts at every cell.
-
-The next modelling milestone is a validated catchment-scale runoff/flood workflow with rainfall time series, terrain conditioning, drainage and river boundary conditions, calibration, and explicit uncertainty. Do not describe the current prototype as a flood forecast or population-at-risk map.

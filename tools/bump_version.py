@@ -1,20 +1,25 @@
-"""
-Stamp a new version on the atlas's own CSS/JS links so browsers fetch fresh copies after an update.
+#!/usr/bin/env python3
+"""Update cache-busting tokens for the static, no-build-step atlas."""
+from pathlib import Path
+from datetime import datetime, timezone
+import re
 
-GitHub Pages lets browsers cache files for about 10 minutes. Without a version stamp, a visitor can get a
-new page.html together with an old cached atlas.js, and the plate fails to load. Run this before each upload:
+ROOT = Path(__file__).resolve().parents[1]
+version = datetime.now(timezone.utc).strftime("%Y%m%d%H%M")
+core = ROOT / "shared" / "atlas.js"
+text = core.read_text(encoding="utf-8")
+updated, count = re.subn(r'Atlas\.version = "[^"]+";', f'Atlas.version = "{version}";', text, count=1)
+if count != 1:
+    raise SystemExit('Could not find Atlas.version in shared/atlas.js; no files changed.')
+core.write_text(updated, encoding="utf-8")
 
-  python3 tools/bump_version.py            # stamps today's date and time, e.g. 20261011-0430
-"""
-import datetime, os, re
-
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-v = datetime.datetime.now().strftime("%Y%m%d-%H%M")
-pat = re.compile(r'((?:href|src)="shared/(?:atlas\.(?:js|css)|vendor/[\w.-]+\.(?:mjs|css)))(?:\?v=[\w-]+)?"')
+# Static resources referenced directly by HTML need their own version query too.
+assets = ["shared/atlas.css", "shared/vendor/maplibre-gl.css", "shared/vendor/maplibre-gl-swipe.css", "shared/vendor/libs.mjs", "shared/atlas.js"]
 for name in ("index.html", "page.html", "explorer.html"):
-    p = os.path.join(ROOT, name)
-    s = open(p, encoding="utf-8").read()
-    s2 = pat.sub(lambda m: f'{m.group(1)}?v={v}"', s)
-    s2 = re.sub(r'<meta name="atlas-version" content="[\w-]*">', f'<meta name="atlas-version" content="{v}">', s2)
-    open(p, "w", encoding="utf-8").write(s2)
-print("atlas version", v)
+    path = ROOT / name
+    html = path.read_text(encoding="utf-8")
+    for asset in assets:
+        html = re.sub(re.escape(asset) + r'(?:\?v=[^"\']*)?', asset + "?v=" + version, html)
+    path.write_text(html, encoding="utf-8")
+print(f"Cambodia Atlas cache version set to {version}")
+print("Dynamic JSON, reading fragments and plate modules use this version automatically.")

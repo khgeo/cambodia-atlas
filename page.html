@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="atlas-version" content="20261011-0937">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Atlas Plate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Kantumruy+Pro:wght@400;600&family=Moul&display=swap">
-<link rel="stylesheet" href="shared/vendor/maplibre-gl.css?v=20261011-0937">
-<link rel="stylesheet" href="shared/vendor/maplibre-gl-swipe.css?v=20261011-0937">
-<link rel="stylesheet" href="shared/atlas.css?v=20261011-0937">
+<link rel="stylesheet" href="shared/vendor/maplibre-gl.css?v=202610111010">
+<link rel="stylesheet" href="shared/vendor/maplibre-gl-swipe.css?v=202610111010">
+<link rel="stylesheet" href="shared/atlas.css?v=202610111010">
 </head>
 <body>
 <div class="plate-app">
@@ -21,8 +20,8 @@
 </div>
 <!-- MapLibre 6 ships as ES modules: libs.mjs loads it and sets window.maplibregl / pmtiles / MaplibreSwipe.
      Module scripts run in document order, so the scripts below see those globals. -->
-<script type="module" src="shared/vendor/libs.mjs?v=20261011-0937"></script>
-<script type="module" src="shared/atlas.js?v=20261011-0937"></script>
+<script type="module" src="shared/vendor/libs.mjs?v=202610111010"></script>
+<script type="module" src="shared/atlas.js?v=202610111010"></script>
 <script type="module">
 (async () => {
   const A = window.Atlas;
@@ -55,7 +54,7 @@
     const ctx = { base, meta, lang: A.lang };
     await mod.addLayers(map, ctx);
     if (mod.mountPanel) await mod.mountPanel(document.getElementById("page-ui"), map, ctx);
-    if (meta.geolibre && meta.geolibre.length && typeof A.geolibreUrl === "function") {
+    if (meta.geolibre && meta.geolibre.length) {
       const local = !/^https:$/.test(location.protocol) || /^(localhost|127\.|\[::1\])/.test(location.hostname);
       const box = document.createElement("section"); box.className = "geolibre-box";
       box.innerHTML = `<a class="geolibre-btn" href="${A.esc(A.geolibreUrl(base, meta.geolibre))}" target="_blank" rel="noopener">
