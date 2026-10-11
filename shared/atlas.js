@@ -9,7 +9,7 @@
   const Atlas = (window.Atlas = window.Atlas || {});
   const pages = {};
   // Updated by tools/bump_version.py to invalidate stale GitHub Pages caches.
-  Atlas.version = "202610111010";
+  Atlas.version = "202610111830";
   Atlas.asset = (url) => `${url}${url.includes("?") ? "&" : "?"}v=${encodeURIComponent(Atlas.version)}`;
 
   // ---------------- language ----------------
