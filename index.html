@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="atlas-version" content="20261011-0430">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cambodia Atlas — Explore · Analyze · Simulate</title>
-<meta name="description" content="An interactive geospatial atlas of Cambodia with administrative boundaries, transport simulations, remote sensing and scenario exploration.">
-<meta name="theme-color" content="#0b1c2b">
+<title>Interactive Cambodia Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Kantumruy+Pro:wght@400;600&family=Moul&display=swap">
-<link rel="stylesheet" href="shared/atlas.css?v=202610111010">
+<link rel="stylesheet" href="shared/atlas.css?v=202610111830">
 </head>
 <body>
 <header class="bar" id="bar"></header>
@@ -24,22 +23,13 @@
       <div class="cover-meta" id="meta"></div>
     </div>
   </div>
-  <section class="atlas-launch" aria-label="Atlas capabilities">
-    <div class="launch-copy"><span class="launch-kicker"><span class="live-pulse"></span> GEOSPATIAL EXPLORATION PLATFORM</span><h2>Explore. Analyze. <em>Simulate.</em></h2><p>Go beyond static maps. Discover Cambodia through interactive geography, time, data and scenarios.</p></div>
-    <div class="launch-actions"><a class="launch-primary" href="explorer.html">Open layer explorer <span aria-hidden="true">↗</span></a><span class="launch-caption">Built for GIS · Remote sensing · Geography learning</span></div>
-    <div class="launch-orbit orbit-one"></div><div class="launch-orbit orbit-two"></div>
-  </section>
-  <section class="atlas-browser" aria-label="Find atlas plates">
-    <div class="browser-heading"><div><div class="eyebrow">ATLAS LIBRARY</div><h2>Explore the collection</h2></div><label class="plate-search"><span aria-hidden="true">⌕</span><input id="plate-search" type="search" placeholder="Search places, topics, or tools…" aria-label="Search atlas plates"></label></div>
-    <div class="filter-row" role="group" aria-label="Filter plates"><button type="button" class="filter-chip active" data-filter="all" aria-pressed="true">All plates</button><button type="button" class="filter-chip" data-filter="live" aria-pressed="false">Interactive now</button><button type="button" class="filter-chip" data-filter="planned" aria-pressed="false">In development</button><span id="filter-count" class="filter-count"></span></div>
-  </section>
   <div class="chapters" id="chapters"><p class="muted">Loading…</p></div>
   <footer class="cover-foot">
     <span id="credit"></span>
     <span><a href="https://github.com/khgeo">github.com/khgeo</a></span>
   </footer>
 </main>
-<script type="module" src="shared/atlas.js?v=202610111010"></script>
+<script type="module" src="shared/atlas.js?v=202610111830"></script>
 <script type="module">
 (async () => {
   const A = window.Atlas, km = A.lang === "km";
@@ -58,37 +48,19 @@
        <span><b class="num">${all.length}</b>${km ? "ផែនទី" : "plates"}</span>
        <span><b class="num">${live}</b>${km ? "ដំណើរការ" : "live"}</span>`;
     document.getElementById("chapters").innerHTML = cat.chapters.map((c) => `
-      <section class="chapter" data-chapter="${A.esc(A.pick(c, "title"))}">
+      <section class="chapter">
         <div class="chapter-label"><div class="ch-num num">${String(c.no).padStart(2, "0")}</div><h2>${A.esc(A.pick(c, "title"))}</h2></div>
         <div class="plates">${c.plates.map((p) => {
           const isLive = p.status === "live";
           const tag = isLive ? "a" : "div";
           const href = isLive ? ` href="page.html#${p.id}"` : "";
-          return `<${tag} class="plate ${isLive ? "" : "planned"}" data-status="${p.status}" data-search="${A.esc([p.no, A.pick(p,"title"), A.pick(p,"summary"), ...(p.books || [])].join(" ").toLowerCase())}"${href}>
+          return `<${tag} class="plate ${isLive ? "" : "planned"}"${href}>
             <div class="plate-no"><span>${A.t("plate")} ${p.no}</span><span class="status ${p.status}">${A.t(p.status)}</span></div>
             <div><h3>${A.esc(A.pick(p, "title"))}</h3><p>${A.esc(A.pick(p, "summary"))}</p></div>
             <div class="book-tags">${(p.books || []).map((b) => `<span class="book-tag">${A.esc(b)}</span>`).join("")}</div>
           </${tag}>`; }).join("")}
         </div>
       </section>`).join("");
-    let activeFilter = "all";
-    const search = document.getElementById("plate-search");
-    const filterButtons = [...document.querySelectorAll("[data-filter]")];
-    const applyFilter = () => {
-      const q = search.value.trim().toLowerCase(); let shown = 0;
-      document.querySelectorAll(".chapter").forEach((chapter) => {
-        let chapterShown = 0;
-        chapter.querySelectorAll(".plate").forEach((plate) => {
-          const ok = (activeFilter === "all" || plate.dataset.status === activeFilter) && (!q || (plate.dataset.search || "").includes(q) || chapter.dataset.chapter.toLowerCase().includes(q));
-          plate.hidden = !ok; if (ok) { chapterShown++; shown++; }
-        });
-        chapter.hidden = chapterShown === 0;
-      });
-      document.getElementById("filter-count").textContent = `${shown} ${km ? "ផែនទី" : (shown === 1 ? "plate" : "plates")}`;
-    };
-    search.addEventListener("input", applyFilter);
-    filterButtons.forEach((b) => b.addEventListener("click", () => { activeFilter = b.dataset.filter; filterButtons.forEach((x) => { x.classList.toggle("active", x === b); x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); applyFilter(); }));
-    applyFilter();
   } catch (e) {
     document.getElementById("chapters").innerHTML = `<p class="note">Could not load the plate list (${A.esc(e.message)}). Open the atlas through a web server, not as a local file.</p>`;
   }
